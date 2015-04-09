@@ -54,7 +54,7 @@ frameNum=0;
 roadMap=[];
 tmpMap=[];
 oldframe=[];
-dirpath='E:\yzbx_programe\Matlab\Data\highway\input\';
+dirpath='D:\firefoxDownload\matlab\dataset2014\dataset\dynamicBackground\boats\input\';
 files=dir(dirpath);
 fileNum=length(files)-2;
 % detect moving objects, and track them across video frames
@@ -120,8 +120,8 @@ end
         % of 1 corresponds to the foreground and the value of 0 corresponds
         % to the background. 
         
-%         obj.detector = vision.ForegroundDetector('NumGaussians', 4, ...
-%             'NumTrainingFrames', 40, 'MinimumBackgroundRatio', 0.7);
+        obj.detector = vision.ForegroundDetector('NumGaussians', 4, ...
+            'NumTrainingFrames', 40, 'MinimumBackgroundRatio', 0.7);
         
         % Connected groups of foreground pixels are likely to correspond to moving
         % objects.  The blob analysis system object is used to find such groups
@@ -198,14 +198,14 @@ end
     function [centroids, bboxes, mask] = detectObjects(frame)
         
         % detect foreground
-%         mask = obj.detector.step(frame);
-        if(frameNum==1)
-            [m,n,c]=size(frame);
-            mask=false(m,n);
-        else
-            mask=frameDiffer(oldframe,frame);
-        end
-        oldframe=frame;
+        mask = obj.detector.step(frame);
+%         if(frameNum==1)
+%             [m,n,c]=size(frame);
+%             mask=false(m,n);
+%         else
+%             mask=frameDiffer(oldframe,frame);
+%         end
+%         oldframe=frame;
         
         % apply morphological operations to remove noise and fill in holes
         mask = imopen(mask, strel('rectangle', [3,3]));
