@@ -1,6 +1,7 @@
 %use framedif to detect backgroud
 %write by yzbx
-function baseFunction_yzbx()
+%the detection function change to point-wise, not region-wise;
+function baseFunction2_yzbx()
 
 %init
 frameNum=0;
@@ -35,7 +36,7 @@ DBColorSet=zeros(channel,5,1);
 DBColorNum=0;
 % FOColorSet=zeros(channel,4,1,'uint8');
 % FOColorNum=0;
-mindifThreshold=4*3;
+mindifThreshold=5^2*3;
 CBBound=uint8([10;10;10]);
 CBMaxBound=uint8([20;20;20]);
 CBMinBound=uint8([20;20;20]);
@@ -175,66 +176,33 @@ end
             cc=bwconncomp(framebw);
             objbasic=regionprops(cc,'basic');
             objnum=cc.NumObjects;
-            pixel=uint8([0;0;0]);
+            regionmask=false(width,height);
+            x1=uint32([0;0]);
+            x2=uint32([0;0]);
             for i=1:objnum
-                c=round(objbasic(i).Centroid);
-                %use maxarea to spliter
-                a=objbasic(i).Area;
-                pixel(:)=frame(c(2),c(1),:);
+                x1=uint32(objbasic(i).Centroid-[height/3,width/3]);
+                x2=uint32(objbasic(i).Centroid+[height/3,width/3]);
+                x1=uint32(max(1,x1));
+                x2=uint32(min(uint32([height,width]),x2));
                 
-             
-                match=false;
-                matchid=1;
-                fitInMaxMin=false;
-                fitid=0;
-                for j=1:DBColorNum
-                   for k=1:channel
-                       if((pixel(k)<DBColorSet(k,LearnLow,j))||(pixel(k)...
-                               >DBColorSet(k,LearnHigh,j)))
-                          break; 
-                       end
-                       if(k==channel)
-                           match=true;
-                           matchid=j;
-                       end
-                   end 
-                   
-                   for k=1:channel
-                       if(( pixel(k) < (DBColorSet(k,LearnMin,j)-CBMinBound(k)) )||( pixel(k)...
-                               > (DBColorSet(k,LearnMax,j)+CBMaxBound(k)) ))
-                          break; 
-                       end
-                       if(k==channel&&a<=5*DBColorSet(2,LearnTimeArea,j))
-                           fitInMaxMin=true;
-                           fitid=j;
-                           break;
-                       end
-                   end 
-                   
-                   if(match)
-                       break;
-                   end
-                            
-                end
-                
-                if(match)   %match then change learnhigh-low,max-min
-                    %remove from framecolorSeg
-                    framecolorSeg(cc.PixelIdxList{i})=0;
-                    
-%                     DBColorSet(:,LearnHigh,matchid)=DBColorSet(:,LearnHigh,matchid)+...
-%                         uint8(DBColorSet(:,LearnHigh,matchid)<(pixel+CBBound));
-%                     DBColorSet(:,LearnLow,matchid)=DBColorSet(:,LearnLow,matchid)-...
-%                         uint8(DBColorSet(:,LearnLow,matchid)>(pixel-CBBound));
-%                     DBColorSet(:,LearnMax,matchid)=max(pixel,DBColorSet(:,LearnMax,matchid));
-%                     DBColorSet(:,LearnMin,matchid)=min(pixel,DBColorSet(:,LearnMin,matchid));
-                end    %unmatch then delete unused CodeBook
-               if(fitInMaxMin)
-                   framemask(cc.PixelIdxList{i})=0;
-               end
-                   
+                regionmask(x1(2):x2(2),x1(1):x2(1))=1;
             end
-           
-%           FOColorWeight=colorKNN(FOColorSet,frame,bw)/area;
+            
+            
+            for i=1:objnum
+                minmask=uint8(DBColorSet(:,LearnMin,i))-CBMinBound;
+                maxmask=uint8(DBColorSet(:,LearnMax,i))+CBMaxBound;
+                b=true(width,height);
+                for j=1:channel
+                    a=((frame(:,:,j)>=minmask(j))&(frame(:,:,j)<=maxmask(j)));
+                    b=a&b;
+                end
+                regionmask(b==1)=0;
+            end
+            
+            framemask=regionmask;
+        else
+            framemask(:)=0;
         end
     end
     function display()

@@ -1,45 +1,5 @@
-%% Motion-Based Multiple Object Tracking
-% This example shows how to perform automatic detection and motion-based
-% tracking of moving objects in a video from a stationary camera.
-%
-% Copyright 2012 The MathWorks, Inc.
-
-%%
-% Detection of moving objects and motion-based tracking are important 
-% components of many computer vision applications, including activity
-% recognition, traffic monitoring, and automotive safety.  The problem of
-% motion-based object tracking can be divided into two parts:
-%
-% # detecting moving objects in each frame 
-% # associating the detections corresponding to the same object over time
-%
-% The detection of moving objects uses a background subtraction algorithm
-% based on Gaussian mixture models. Morphological operations are applied to
-% the resulting foreground mask to eliminate noise. Finally, blob analysis
-% detects groups of connected pixels, which are likely to correspond to
-% moving objects. 
-%
-% The association of detections to the same object is based solely on
-% motion. The motion of each track is estimated by a Kalman filter. The
-% filter is used to predict the track's location in each frame, and
-% determine the likelihood of each detection being assigned to each 
-% track.
-%
-% Track maintenance becomes an important aspect of this example. In any
-% given frame, some detections may be assigned to tracks, while other
-% detections and tracks may remain unassigned.The assigned tracks are
-% updated using the corresponding detections. The unassigned tracks are 
-% marked invisible. An unassigned detection begins a new track. 
-%
-% Each track keeps count of the number of consecutive frames, where it
-% remained unassigned. If the count exceeds a specified threshold, the
-% example assumes that the object left the field of view and it deletes the
-% track.  
-%
-% This example is a function with the main body at the top and helper 
-% routines in the form of 
-% <matlab:helpview(fullfile(docroot,'toolbox','matlab','matlab_prog','matlab_prog.map'),'nested_functions') nested functions> 
-% below.
+%base function from matlab
+%use pic frame as input, compare to BS_BaseFunction_yzbx.m
 
 function BS_picFrame_yzbx()
 
