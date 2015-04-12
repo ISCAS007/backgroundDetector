@@ -1,23 +1,27 @@
 %use framedif to detect backgroud
 %write by yzbx
 %the detection function change to point-wise, not region-wise;
-function baseFunction2_yzbx()
+function baseFunction_evaluation_yzbx()
 
 %init
 frameNum=0;
-filepath='D:\firefoxDownload\matlab\dataset2014\dataset\dynamicBackground\boats\input';
+filepath='E:\yzbx_programe\Matlab\Data\boats\input';
+otherpath='E:\yzbx_programe\Matlab\Data\boats\groundtruth';
 filelist=dir(filepath);
+otherlist=dir(otherpath);
 filenum=length(filelist)-2;
 filename={filelist.name};
+othername={otherlist.name};
 colorTransform = makecform('srgb2lab');
+otherframe=[];
 frame=getNextFrame();
 [width,height,channel]=size(frame);
 minarea=max(30,floor(width*height/1000));
 videoPlayer = vision.VideoPlayer('Position', [840, 50, 350, 200],'Name','origin frame');
-difPlayer = vision.VideoPlayer('Position', [840, 300, 350, 200],'Name','frame-oldframe');
-areaOpenPlayer = vision.VideoPlayer('Position', [840, 550, 350, 200],'Name','area open');
-colorSegPlayer=vision.VideoPlayer('Position',[840,700,350,200],'Name','color seg');
-maskPlayer=vision.VideoPlayer('Position',[400,700,350,200],'Name','mask');
+difPlayer = vision.VideoPlayer('Position', [400, 300, 350, 200],'Name','frame-otherframe');
+areaOpenPlayer = vision.VideoPlayer('Position', [840, 400, 350, 200],'Name','area open');
+colorSegPlayer=vision.VideoPlayer('Position',[840,500,350,200],'Name','color seg');
+maskPlayer=vision.VideoPlayer('Position',[400,500,350,200],'Name','mask');
 
 framedif=[];
 framebw=[];
@@ -29,12 +33,13 @@ LearnHigh=2;
 LearnMin=3;
 LearnMax=4;
 LearnTimeArea=5;
-CacheSize=ceil((width+height)/2);
-% SBColorSet=zeros(channel,4,1,'uint8');
-% SBColorNum=0;
+CBUpdateRate=10;
+CBUpdateClock=0;
+SBColorSet=zeros(channel,5,1);
+SBColorNum=0;
 DBColorSet=zeros(channel,5,1);
 DBColorNum=0;
-% FOColorSet=zeros(channel,4,1,'uint8');
+% FOColorSet=zeros(channel,5,1);
 % FOColorNum=0;
 mindifThreshold=5^2*3;
 CBBound=uint8([10;10;10]);
@@ -49,10 +54,11 @@ end
 trainningFrameNum=300;
 while frame<filenum
     oldframe=frame;
+    CBUpdateClock=CBUpdateClock+1;
     frame=getNextFrame();
     if(frameNum<trainningFrameNum)
         init();
-        if(frameNum==trainningFrameNum)
+        if(CBUpdateClock>=CBUpdateRate)
            clearCB(); 
         end
     else
@@ -66,6 +72,7 @@ end
     function frame=getNextFrame()
         frameNum=frameNum+1;
         frame=imread([filepath,'\',filename{frameNum+2}]);
+        otherframe=imread([otherpath,'\',othername{frameNum+2}]);
 %         frame =applycform(frame, colorTransform);
     end
     
@@ -150,10 +157,11 @@ end
 %     end
 
     function clearCB()
+        CBUpdateClock=0;
         time=zeros(DBColorNum,1);
         time(:)=DBColorSet(1,LearnTimeArea,:);
         time=frameNum-time;
-        idx=(time<frameNum/2);
+        idx=(time<CBUpdateRate);
         DBColorSet=DBColorSet(:,:,idx);
         DBColorNum=sum(idx);
     end
@@ -179,7 +187,7 @@ end
             regionmask=false(width,height);
             x1=uint32([0;0]);
             x2=uint32([0;0]);
-            for i=1:objnum
+            for i=1:objnum  %use objnum.BoundingBox[
                 x1=uint32(objbasic(i).Centroid-[height/3,width/3]);
                 x2=uint32(objbasic(i).Centroid+[height/3,width/3]);
                 x1=uint32(max(1,x1));
@@ -189,7 +197,7 @@ end
             end
             
             
-            for i=1:objnum
+            for i=1:DBColorNum
                 minmask=uint8(DBColorSet(:,LearnMin,i))-CBMinBound;
                 maxmask=uint8(DBColorSet(:,LearnMax,i))+CBMaxBound;
                 b=true(width,height);
@@ -205,12 +213,39 @@ end
             framemask(:)=0;
         end
     end
+   
     function display()
         videoPlayer.step(frame);
-%         difPlayer.step(imadjust(framedif));
-        areaOpenPlayer.step(framebw);
-        colorSegPlayer.step(framecolorSeg);
-        maskPlayer.step(framemask);
+        difPlayer.step(otherframe);
+        
+        areaOpenPlayer.step(mask_yzbx(frame,framebw));
+        colorSegPlayer.step(mask_yzbx(frame,framecolorSeg));
+        maskPlayer.step(mask_yzbx(frame,framemask));
+    end
+    
+%f=frame, m=mask, s=expand size, p=preimter, b=boundingBox
+    function newm=colorExpand(f,m,s,b)
+        p=bwperim(m);
+        nump=length(p);
+        select=[1:10:nump];
+        selp=p(select);
+        
+        newm=m;
+        numsel=length(selp);
+      
+        self=f(b(1):b(1)+b(3)*s,b(2):b(2)+b(4)*s,:);
+        for i=1:numsel
+             minmask=uint8(f(selp(i))-5);
+             maxmask=uint8(f(selp(i))+5);
+             b=true(size(self,1),size(self,2));
+             for j=1:channel
+                a=((self(:,:,j)>=minmask(j))&(self(:,:,j)<=maxmask(j)));
+                b=a&b;
+             end
+             newm(b(1):b(1)+b(3)*s,b(2):b(2)+b(4)*s)=...
+                 newm(b(1):b(1)+b(3)*s,b(2):b(2)+b(4)*s)|b;
+        end
+      
     end
 end
 

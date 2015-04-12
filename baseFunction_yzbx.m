@@ -84,7 +84,7 @@ end
                 
              
                 match=false;
-                matchid=1;
+                matchid=0;
                 for j=1:DBColorNum
                    for k=1:channel
                        if((pixel(k)<DBColorSet(k,LearnLow,j))||(pixel(k)...
@@ -122,8 +122,8 @@ end
                     DBColorSet(:,LearnLow,DBColorNum)=pixel-CBBound;
                     DBColorSet(:,LearnMax,DBColorNum)=pixel;
                     DBColorSet(:,LearnMin,DBColorNum)=pixel;
-                    DBColorSet(1,LearnTimeArea,matchid)=frameNum;
-                    DBColorSet(2,LearnTimeArea,matchid)=a;
+                    DBColorSet(1,LearnTimeArea,DBColorNum)=frameNum;
+                    DBColorSet(2,LearnTimeArea,DBColorNum)=a;
                 end
                 
             end
