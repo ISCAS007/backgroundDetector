@@ -46,7 +46,7 @@ if(filenum<2||~isa(frame,'uint8')||channel~=3)
     return
 end
 trainningFrameNum=300;
-while frame<filenum
+while frameNum<filenum
     oldframe=frame;
     frame=getNextFrame();
     if(frameNum<trainningFrameNum)

@@ -1,0 +1,9 @@
+filepath='D:\firefoxDownload\matlab\dataset2014\dataset\dynamicBackground\boats\input';
+otherpath='D:\firefoxDownload\matlab\dataset2014\dataset\dynamicBackground\boats\groundtruth';
+filelist=dir(filepath);
+otherlist=dir(otherpath);
+filenum=length(filelist)-2;
+filename={filelist.name};
+othername={otherlist.name};
+frameNum=1800;
+frame=getNextFrame(frameNum,filepath,filename);

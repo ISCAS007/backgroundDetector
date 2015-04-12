@@ -4,9 +4,11 @@
 function baseFunction3_yzbx()
 
 %init
-frameNum=0;
-filepath='E:\yzbx_programe\Matlab\Data\boats\input';
-otherpath='E:\yzbx_programe\Matlab\Data\boats\groundtruth';
+frameNum=1800;
+% filepath='E:\yzbx_programe\Matlab\Data\boats\input';
+% otherpath='E:\yzbx_programe\Matlab\Data\boats\groundtruth';
+filepath='D:\firefoxDownload\matlab\dataset2014\dataset\dynamicBackground\boats\input';
+otherpath='D:\firefoxDownload\matlab\dataset2014\dataset\dynamicBackground\boats\groundtruth';
 filelist=dir(filepath);
 otherlist=dir(otherpath);
 filenum=length(filelist)-2;
@@ -39,24 +41,25 @@ SBCBNum=0;
 DBCB=zeros(channel,5,1);
 DBCBNum=0;
 mindifThreshold=5^2*3;
-factor=0.5;
-CBBound=uint8([200;10;10]*factor);
-DBCBMaxBound=uint8([200;20;20]*factor);
-DBCBMinBound=uint8([200;20;20]*factor);
-SBCBMaxBound=uint8([200;20;20]*factor);
-SBCBMinBound=uint8([200;20;20]*factor);
+factor=0.1;
+CBBound=uint8([200;5;5]);
+DBCBMaxBound=uint8([200/factor;20;20]*factor);
+DBCBMinBound=uint8([200/factor;20;20]*factor);
+SBCBMaxBound=uint8([200/factor;20;20]*factor);
+SBCBMinBound=uint8([200/factor;20;20]*factor);
 %loop
 if(filenum<2||~isa(frame,'uint8')||channel~=3)
     disp('filenum < 2 or class(frame)~=uint8 ');
     return
 end
-trainningFrameNum=300;
-while frame<filenum
+filenum=min(filenum,2100);
+trainningFrameNum=100;
+while frameNum<filenum
     oldframe=frame;
     DBCBClock=DBCBClock+1;
     SBCBClock=SBCBClock+1;
     frame=getNextFrame();
-    if(frameNum<trainningFrameNum)
+    if(frameNum<trainningFrameNum+1800)
         [SBCB,SBCBNum]=SBCBUpdate(frame,SBCB,SBCBNum,frameNum,CBBound);
         SBCBarea=zeros(SBCBNum,1);
         [SBCBmask,SBCBarea]=SBCBFilter(frame,SBCB,SBCBNum,SBCBMinBound,SBCBMaxBound);
@@ -64,11 +67,11 @@ while frame<filenum
         [SBCBMinBound,SBCBMaxBound,SBCBUpdateCycle]=SBCBParameterUpdate(frame,SBCBmask,SBCBMinBound,SBCBMaxBound,SBCBUpdateCycle,SBCBNum);
         
         DBframe=imabsdiff(mask_yzbx(frame,~SBCBmask),mask_yzbx(oldframe,~SBCBmask));
-        [DBCB,DBCBNum]=SBCBUpdate(DBframe,DBCB,DBCBNum,frameNum,CBBound);
+        [DBCB,DBCBNum]=DBCBUpdate(DBframe,DBCB,DBCBNum,frameNum,CBBound);
         DBCBarea=zeros(DBCBNum,1);
         [DBCBmask,DBCBarea]=SBCBFilter(DBframe,DBCB,DBCBNum,DBCBMinBound,DBCBMaxBound);
         DBCB(2,LearnTimeArea,:)=DBCBarea(:);
-        [DBCBMinBound,DBCBMaxBound,DBCBUpdateCycle]=SBCBParameterUpdate(DBframe,DBCBmask,DBCBMinBound,DBCBMaxBound,DBCBUpdateCycle,DBCBNum);
+        [DBCBMinBound,DBCBMaxBound,DBCBUpdateCycle]=DBCBParameterUpdate(DBframe,DBCBmask,DBCBMinBound,DBCBMaxBound,DBCBUpdateCycle,DBCBNum);
         
         CAmask=ColorAmend(frame);
         if(DBCBClock>=DBCBUpdateCycle)
@@ -79,6 +82,7 @@ while frame<filenum
         end
     else
         SBCBmask=SBCBFilter(frame,SBCB,SBCBNum,SBCBMinBound,SBCBMaxBound);
+        DBframe=imabsdiff(mask_yzbx(frame,~SBCBmask),mask_yzbx(oldframe,~SBCBmask));
         DBCBmask=SBCBFilter(DBframe,DBCB,DBCBNum,DBCBMinBound,DBCBMaxBound);
         CAmask=ColorAmend(frame);
 %         [SBCBMinBound,SBCBMaxBound,SBCBUpdateCycle]=SBCBParameterUpdate(mask,SBCBMinBound,SBCBMaxBound,SBCBUpdateCycle,SBCBNum);
@@ -229,7 +233,7 @@ end
     function display()
         videoPlayer.step(frame);
         SBCBPlayer.step(mask_yzbx(frame,SBCBmask));      
-        DBCBPlayer.step(mask_yzbx(frame,DBCBmask));
+        DBCBPlayer.step(adapt_yzbx(mask_yzbx(DBframe,DBCBmask)));
         ColorAmendPlayer.step(mask_yzbx(frame,CAmask));
     end
     

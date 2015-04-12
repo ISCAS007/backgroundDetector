@@ -1,4 +1,4 @@
-function [MinBound,MaxBound,updateCycle]=SBCBParameterUpdate(frame,mask,MinBound,MaxBound,updateCycle,CBNum)
+function [MinBound,MaxBound,updateCycle]=DBCBParameterUpdate(frame,mask,MinBound,MaxBound,updateCycle,CBNum)
 % struct array    
 cc=bwconncomp(mask);
 NumObjects=cc.NumObjects;
@@ -10,8 +10,8 @@ if(Area<0.5*frameArea)
         updateCycle=updateCycle+2;
     end
 
-    MinBound(2:3)=min(MinBound(2:3)+1,10);
-    MaxBound(2:3)=min(MaxBound(2:3)+1,10);
+    MinBound(2:3)=min(MinBound(2:3)+1,3);
+    MaxBound(2:3)=min(MaxBound(2:3)+1,3);
 else
     updateCycle=updateCycle-1;
     sub=uint8(rand(1)>0.5);
