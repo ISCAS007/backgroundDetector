@@ -1,4 +1,6 @@
-function CAmask=ColorAmend(frame)
+function CAmask=ColorAmend(layermask,frame,layer)
     [width,height,channel]=size(frame);
-    CAmask=false(width,height);
+    areaThreshold=width*height/1000;
+    CAmask=~layermask;
+    CAmask=bwareaopen(CAmask,round(areaThreshold));
 end
