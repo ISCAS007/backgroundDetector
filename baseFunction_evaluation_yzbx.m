@@ -1,4 +1,4 @@
-%use framedif to detect backgroud
+%use layer to detect backgroud
 %write by yzbx
 %the detection function change to point-wise, not region-wise;
 function baseFunction_evaluation_yzbx()
@@ -16,57 +16,57 @@ colorTransform = makecform('srgb2lab');
 otherframe=[];
 frame=getNextFrame();
 [width,height,channel]=size(frame);
-minarea=max(30,floor(width*height/1000));
+
+layer=struct(...
+'layermax',zeros(size(frame),'uint8'),...
+'layermin',zeros(size(frame),'uint8'),...
+'layergap',zeros(size(frame),'uint8'),...
+'layerbase',zeros(size(frame),'double'),...
+'rangeradio',zeros(size(frame),'double'),...
+'frameNum',0);
+
+
 videoPlayer = vision.VideoPlayer('Position', [840, 50, 350, 200],'Name','origin frame');
-difPlayer = vision.VideoPlayer('Position', [400, 300, 350, 200],'Name','frame-otherframe');
-areaOpenPlayer = vision.VideoPlayer('Position', [840, 400, 350, 200],'Name','area open');
-colorSegPlayer=vision.VideoPlayer('Position',[840,500,350,200],'Name','color seg');
-maskPlayer=vision.VideoPlayer('Position',[400,500,350,200],'Name','mask');
+layerPlayer = vision.VideoPlayer('Position', [840, 350, 350, 200],'Name','layer frame');
+groundTruthPlayer = vision.VideoPlayer('Position', [440, 50, 350, 200],'Name','groundTruth frame');
+ColorAmendPlayer=vision.VideoPlayer('Position',[440,350,350,200],'Name','ColorAmend frame');
 
-framedif=[];
-framebw=[];
-framecolorSeg=[];
-framemask=[];
+layermask=zeros(width,height);
+CAmask=zeros(width,height);
 
-LearnLow=1;
-LearnHigh=2;
-LearnMin=3;
-LearnMax=4;
-LearnTimeArea=5;
-CBUpdateRate=10;
-CBUpdateClock=0;
-SBColorSet=zeros(channel,5,1);
-SBColorNum=0;
-DBColorSet=zeros(channel,5,1);
-DBColorNum=0;
-% FOColorSet=zeros(channel,5,1);
-% FOColorNum=0;
-mindifThreshold=5^2*3;
-CBBound=uint8([10;10;10]);
-CBMaxBound=uint8([20;20;20]);
-CBMinBound=uint8([20;20;20]);
-
-%loop
+%check
 if(filenum<2||~isa(frame,'uint8')||channel~=3)
-    disp('filenum < 2 or class(frame)~=uint8 ');
+    disp('filenum < 2 or class(frame)~=uint8 or channel~=3');
     return
 end
+% loop
 trainningFrameNum=300;
-while frame<filenum
-    oldframe=frame;
-    CBUpdateClock=CBUpdateClock+1;
+startFrameNum=1900-trainningFrameNum;
+frameNum=frameNum+startFrameNum;
+trainningFrameNum=startFrameNum+trainningFrameNum;
+endFrameNum=2100;
+while frameNum<min(filenum,endFrameNum)
     frame=getNextFrame();
     if(frameNum<trainningFrameNum)
-        init();
-        if(CBUpdateClock>=CBUpdateRate)
-           clearCB(); 
-        end
+        
+        layermask=layerFilter(frame,layer);
+        layer=layerUpdate(layermask,frame,layer);
+        
+        CAmask=ColorAmend(layermask,frame,layer);
     else
-        detect();
+        layermask=layerFilter(frame,layer);
+        CAmask=ColorAmend(layermask,frame,layer);
+        imshow(layerFilter2(frame,layer));
+        title('layerFilter2');
     end
     
     display();
 end
+
+figure,imshow(adapt_yzbx(layer.layermax-layer.layermin));
+title('range (layer.layermax-layer.layermin)');
+figure,imshow(adapt_yzbx(layer.layergap));
+title('layer.layergap');
 %function define
     
     function frame=getNextFrame()
@@ -75,177 +75,12 @@ end
         otherframe=imread([otherpath,'\',othername{frameNum+2}]);
 %         frame =applycform(frame, colorTransform);
     end
-    
-    function init()
-        area=preDeal();
-        
-        if(area>=minarea)
-            cc=bwconncomp(framebw);
-            objbasic=regionprops(cc,'basic');
-            objnum=cc.NumObjects;
-            pixel=uint8([0;0;0]);
-            for i=1:objnum
-                c=round(objbasic(i).Centroid);
-                %use maxarea to spliter
-                a=objbasic(i).Area;
-                pixel(:)=frame(c(2),c(1),:);
-                
-             
-                match=false;
-                matchid=0;
-                for j=1:DBColorNum
-                   for k=1:channel
-                       if((pixel(k)<DBColorSet(k,LearnLow,j))||(pixel(k)...
-                               >DBColorSet(k,LearnHigh,j)))
-                          break; 
-                       end
-                       if(k==channel)
-                           match=true;
-                           matchid=j;
-                       end
-                   end 
-                   
-                   if(match)
-                       break;
-                   end
-                end
-                
-                if(match)   %match then change learnhigh-low,max-min
-                    %remove from framecolorSeg
-                    framecolorSeg(cc.PixelIdxList{i})=0;
-                    
-                    DBColorSet(:,LearnHigh,matchid)=DBColorSet(:,LearnHigh,matchid)+...
-                        double(DBColorSet(:,LearnHigh,matchid)<(pixel+CBBound));
-                    DBColorSet(:,LearnLow,matchid)=DBColorSet(:,LearnLow,matchid)-...
-                        double(DBColorSet(:,LearnLow,matchid)>(pixel-CBBound));
-                    DBColorSet(:,LearnMax,matchid)=max(double(pixel),DBColorSet(:,LearnMax,matchid));
-                    DBColorSet(:,LearnMin,matchid)=min(double(pixel),DBColorSet(:,LearnMin,matchid));
-                    
-                    DBColorSet(1,LearnTimeArea,matchid)=frameNum;
-                    DBColorSet(2,LearnTimeArea,matchid)=max(DBColorSet(2,LearnTimeArea,matchid),a);
-                else    %unmatch then add CB
-                    
-                    DBColorNum=DBColorNum+1;
-                    DBColorSet(:,LearnHigh,DBColorNum)=pixel+CBBound;
-                    DBColorSet(:,LearnLow,DBColorNum)=pixel-CBBound;
-                    DBColorSet(:,LearnMax,DBColorNum)=pixel;
-                    DBColorSet(:,LearnMin,DBColorNum)=pixel;
-                    DBColorSet(1,LearnTimeArea,DBColorNum)=frameNum;
-                    DBColorSet(2,LearnTimeArea,DBColorNum)=a;
-                end
-                
-            end
-           
-%           FOColorWeight=colorKNN(FOColorSet,frame,bw)/area;
-        end
-    end
-    
-%     function knnmask=colorKNN(colorset,pic,roi)
-%         num=size(colorset,2);
-%         distance=zeros(size(pic,1),size(pic,2),num);
-%         for i=1:num
-%             distance(:,:,i)=sqrt(double((pic(:,:,2)-colorset(2,i)).^2+...
-%                 (pic(:,:,3)-colorset(3,i)).^2));
-%         end
-%         [value,label]=min(distance,[],3);
-%         maxcolorGap=30;
-%         label(value>maxcolorGap)=0;
-%         weight=zeros(num,1);
-%         for i=1:num
-%             weight(i)=sum(roi(label==i));
-%         end
-%     end
-
-    function clearCB()
-        CBUpdateClock=0;
-        time=zeros(DBColorNum,1);
-        time(:)=DBColorSet(1,LearnTimeArea,:);
-        time=frameNum-time;
-        idx=(time<CBUpdateRate);
-        DBColorSet=DBColorSet(:,:,idx);
-        DBColorNum=sum(idx);
-    end
-    function area=preDeal()
-        framedif=oldframe-frame;
-        framedif123=framedif(:,:,1).^2+framedif(:,:,2).^2+framedif(:,:,3).^2;
-        framedif=rgb2gray(framedif);
-       
-        framebw=bwareaopen(framedif123>mindifThreshold,minarea);
-        framebw=imfill(framebw,'holes');
-        area=bwarea(framebw);
-        framecolorSeg=framebw;
-        framemask=framebw;
-    end
-    function detect()
-        %use rgb distance or lab distance ?
-        area=preDeal();
-        
-        if(area>=minarea)
-            cc=bwconncomp(framebw);
-            objbasic=regionprops(cc,'basic');
-            objnum=cc.NumObjects;
-            regionmask=false(width,height);
-            x1=uint32([0;0]);
-            x2=uint32([0;0]);
-            for i=1:objnum  %use objnum.BoundingBox[
-                x1=uint32(objbasic(i).Centroid-[height/3,width/3]);
-                x2=uint32(objbasic(i).Centroid+[height/3,width/3]);
-                x1=uint32(max(1,x1));
-                x2=uint32(min(uint32([height,width]),x2));
-                
-                regionmask(x1(2):x2(2),x1(1):x2(1))=1;
-            end
-            
-            
-            for i=1:DBColorNum
-                minmask=uint8(DBColorSet(:,LearnMin,i))-CBMinBound;
-                maxmask=uint8(DBColorSet(:,LearnMax,i))+CBMaxBound;
-                b=true(width,height);
-                for j=1:channel
-                    a=((frame(:,:,j)>=minmask(j))&(frame(:,:,j)<=maxmask(j)));
-                    b=a&b;
-                end
-                regionmask(b==1)=0;
-            end
-            
-            framemask=regionmask;
-        else
-            framemask(:)=0;
-        end
-    end
    
     function display()
         videoPlayer.step(frame);
-        difPlayer.step(otherframe);
-        
-        areaOpenPlayer.step(mask_yzbx(frame,framebw));
-        colorSegPlayer.step(mask_yzbx(frame,framecolorSeg));
-        maskPlayer.step(mask_yzbx(frame,framemask));
-    end
-    
-%f=frame, m=mask, s=expand size, p=preimter, b=boundingBox
-    function newm=colorExpand(f,m,s,b)
-        p=bwperim(m);
-        nump=length(p);
-        select=[1:10:nump];
-        selp=p(select);
-        
-        newm=m;
-        numsel=length(selp);
-      
-        self=f(b(1):b(1)+b(3)*s,b(2):b(2)+b(4)*s,:);
-        for i=1:numsel
-             minmask=uint8(f(selp(i))-5);
-             maxmask=uint8(f(selp(i))+5);
-             b=true(size(self,1),size(self,2));
-             for j=1:channel
-                a=((self(:,:,j)>=minmask(j))&(self(:,:,j)<=maxmask(j)));
-                b=a&b;
-             end
-             newm(b(1):b(1)+b(3)*s,b(2):b(2)+b(4)*s)=...
-                 newm(b(1):b(1)+b(3)*s,b(2):b(2)+b(4)*s)|b;
-        end
-      
+        layerPlayer.step(mask_yzbx(frame,layermask));
+        ColorAmendPlayer.step(mask_yzbx(frame,CAmask));
+        groundTruthPlayer.step(otherframe);
     end
 end
 
