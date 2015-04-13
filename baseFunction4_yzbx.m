@@ -7,6 +7,10 @@ function baseFunction4_yzbx()
 frameNum=0;
 filepath='E:\yzbx_programe\Matlab\Data\boats\input';
 otherpath='E:\yzbx_programe\Matlab\Data\boats\groundtruth';
+if(size(dir(filepath),1)==0)
+    filepath='D:\firefoxDownload\matlab\dataset2014\dataset\dynamicBackground\boats\input';
+    otherpath='D:\firefoxDownload\matlab\dataset2014\dataset\dynamicBackground\boats\groundtruth';
+end
 filelist=dir(filepath);
 otherlist=dir(otherpath);
 filenum=length(filelist)-2;
@@ -62,6 +66,8 @@ end
 
 figure,imshow(adapt_yzbx(layer.layermax-layer.layermin));
 figure,imshow(adapt_yzbx(layer.layergap));
+
+disp('function end here........');
 %function define
     
     function frame=getNextFrame()
