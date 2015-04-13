@@ -3,4 +3,7 @@ function CAmask=ColorAmend(layermask,frame,layer)
     areaThreshold=width*height/1000;
     CAmask=~layermask;
     CAmask=bwareaopen(CAmask,round(areaThreshold));
+    Layermask=layerFilter2(frame,layer);
+    
+    maskMerge_yzbx(CAmask,Layermask);
 end
