@@ -54,7 +54,7 @@ while frameNum<min(filenum,endFrameNum)
         layer=layerUpdate(layermask,frame,layer);
         CAmask=ColorAmend(layermask,frame,layer);
         if(frameNum==ROIframeNum(1))
-            save([outputpath,'/train.mat'],inputpath,trainningFrameNum,layer);
+            save(outputpath,'inputpath','trainningFrameNum','layer');
         end
     else
         layermask=layerFilter(frame,layer);
