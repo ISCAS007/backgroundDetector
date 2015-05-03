@@ -3,14 +3,14 @@
 % groundtruth 有5类
 % outside roi=85,unknown=170,motion=255,hard shadow=50,static=0
 % 突然停止的目标将逐渐融入背景
-function dataAnalyze(root)
-% root='D:\firefoxDownload\matlab\dataset2012\dataset';
+function dataAnalyze()
+root='D:\firefoxDownload\matlab\dataset2012\dataset';
 % layernum=3;
 pathlist1=dir(root);
 filenum1=length(pathlist1);
 filenamelist1={pathlist1.name};
 polys=zeros(6,10,10);
-results=zeros(6,10,10);
+results=zeros(8,10,10);
 for i=3:filenum1
 %    if(i<6)
 %        continue;
@@ -34,6 +34,7 @@ for i=3:filenum1
    end
 end
 save('analyze.mat','polys','results');
+showAnalyze(polys,results,filenamelist1);
 
 function [poly,result]=analyze(rgb,class,filename,i,j)
 % analyze rgb and class
@@ -64,15 +65,16 @@ if(c==1)
    r=zeros(1,d);
    r(:)=rgb(3,3,1,:);
     
-   h=figure;scatter(1:d,r(static),3);
+   h=figure('Name',[filename,'-gray']);
+   scatter(1:d,r(static),3);
    hold on,scatter(1:d,r(unknown),3);
    scatter(1:d,r(motion),3);
    scatter(1:d,r(shadow),3);
    legend('static','unknown','motion','shadow'),title([filename,'-gray']);
    saveas(h,filename(1:end-4),'jpg');
    
-   poly=[0,mean(r(static)),0,0,0,0];
-   result=[0,0,0,0,0,0];
+   poly=[0,mean(r(static)),0,1,0,0];
+   result=zeros(1,8);
 else
     r=zeros(1,d);
     g=zeros(1,d);
@@ -105,7 +107,8 @@ else
 %     legend('static','unknown','motion','shadow');
 %     saveas(h,[filename(1:end-4),'-br'],'jpg');
     
-    h=figure;scatter3(r(static),g(static),b(static),3);title([filename,'-r,g,b']);
+    h=figure('Name',[filename,'-r,g,b']);
+    scatter3(r(static),g(static),b(static),3);title([filename,'-r,g,b']);
     hold on,scatter3(r(unknown),g(unknown),b(unknown),3);
     scatter3(r(motion),g(motion),b(motion),3);
     scatter3(r(shadow),g(shadow),b(shadow),3);
@@ -115,14 +118,36 @@ else
     p=linefit3d(r(static),g(static),b(static));
     pre=p(4:6)'*r+p(1:3)'*ones(size(r));
     dif=sum(abs(pre-[r;g;b]),1);
+
+%     计算光照强度带来的差别,difab为超出背景像素范围后的差别计算    
+    minsr=min(r(static));
+    a=p(4:6)*minsr+p(1:3);
+    pre=a'*ones(size(r));
+    difa=sum(abs(pre-[r;g;b]),1);
+    
+    maxsr=max(r(static));
+    a=p(4:6)*maxsr+p(1:3);
+    pre=a'*ones(size(r));
+    difb=sum(abs(pre-[r;g;b]),1);
+    
+    difab=min(difa,difb);
+    idx1=find(r<maxsr);
+    idx2=r(idx1)>minsr;
+    idx=idx1(idx2);
+    
+    difab(idx)=dif(idx);
+%     考虑光照强度信息 consider lighting information
+    dif=difab;
+%   注释可忽略光照强度信息
+    
     maxstatic=max(dif(static));
     lengthstatic=length(static);
     minmotion=min(dif(motion));
     lengthmotion=length(motion);
-    result=[mean(dif(static)),max(dif(static)),...
-        mean(dif(motion)),min(dif(motion)),...
-        sum(dif(static)>minmotion)/lengthstatic,...
-        sum(dif(motion)<maxstatic)/lengthmotion];
+    result=[mean(dif(static)),max(dif(static)),lengthstatic,...
+        mean(dif(motion)),min(dif(motion)),lengthmotion,...
+        sum(dif(static)>=minmotion)/lengthstatic,...
+        sum(dif(motion)<=maxstatic)/lengthmotion];
     
     
     x=min(50,min(r(static))):max(200,max(r(static)));
@@ -153,3 +178,62 @@ start=length(root);
 shortpath=path(start+1:end);
 filename=strrep(shortpath,'\','-');
 filename=[filename,'.mat'];
+
+function showAnalyze(polys,results,dataset2012)
+% load analyze.mat;
+% load dataset2012.mat;
+
+% polys=zeros(6,10,10);
+% results=zeros(8,10,10);
+% result=[mean(dif(static)),max(dif(static)),size(static),...
+%         mean(dif(motion)),min(dif(motion)),size(motion),...
+%         sum(dif(static)>minmotion)/lengthstatic,...
+%         sum(dif(motion)<maxstatic)/lengthmotion];
+% poly=[0,p1(2),p2(2),1,p1(1),p2(1)];
+polys=polys(:,3:end,3:end);
+results=results(:,3:end,3:end);
+
+
+col=zeros(1,8);
+wid=60;
+cfor{8}='bank';
+for j=1:8
+   cfor{j}='bank'; 
+end
+pcname={'x0','y0','z0','v1','v2','v3'};
+for i=1:8
+    data=polys(:,i,:);
+    data=data(:);
+    if(sum(data)~=0)
+        data=reshape(data,6,8);
+        data=data';
+        col(i)=sum(data(:,4));
+        figure('Name',[dataset2012{i+2},' polys']);
+        t=uitable('data',data(1:col(i),:));
+        set(t,'columnWidth',{wid});
+        set(t,'columnFormat',cfor);
+        set(t,'columnName',pcname);
+        set(t,'Position',[30,30,50+6*wid,200]);
+    end
+end
+
+rcname={'mean(s)','max(s)','num(s)','mean(m)','min(m)','num(m)','NN','NP'};
+for i=1:8
+    data=results(:,i,:);
+    data=data(:);
+    poly=polys(:,i,:);
+    poly=poly(:);
+%     对于灰度图像，results全为0
+    if(sum(poly)~=0)
+        data=reshape(data,8,8);
+        data=data';
+        data(:,7:8)=data(:,7:8)*100;
+%         uitable('data',data);
+        figure('Name',[dataset2012{i+2},' results']);
+        t=uitable('data',data(1:col(i),:));
+        set(t,'columnWidth',{wid});
+        set(t,'columnFormat',cfor);
+        set(t,'columnName',rcname);
+        set(t,'Position',[30,30,50+8*wid,200]);
+    end
+end

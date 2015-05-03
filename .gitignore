@@ -6,3 +6,6 @@
 *.fig
 tmp*.m
 *.ini
+*.log
+analyze
+fig

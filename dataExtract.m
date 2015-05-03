@@ -3,8 +3,8 @@
 % groundtruth 有5类
 % outside roi=85,unknown=170,motion=255,hard shadow=50,static=0
 % 突然停止的目标将逐渐融入背景
-function dataExtract(root)
-% root='D:\firefoxDownload\matlab\dataset2012\dataset';
+function dataExtract()
+root='D:\firefoxDownload\matlab\dataset2012\dataset';
 % layernum=3;
 init();
 

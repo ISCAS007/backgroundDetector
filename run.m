@@ -1,4 +1,4 @@
 inputpath='D:\firefoxDownload\matlab';
-filename='dataset2014\dataset\dynamicBackground\fall';
+filename='dataset2012\dataset\baseline\PETS2006';
 outputpath=strrep(filename,'\','.');
-layerAlgrithm([inputpath,'\',filename],['mat\',outputpath,'.mat']);
+layerAlgrithm([inputpath,'\',filename],['analyze\',outputpath,'.mat']);
