@@ -4,7 +4,6 @@
 *.jpg
 *.cfg
 *.fig
-tmp*.m
 *.ini
 *.log
 analyze

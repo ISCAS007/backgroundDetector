@@ -1,4 +1,4 @@
-function [layermask,absdiff]=radioLayerFilter_yzbx(frame,layermax,layermin,layergap,rangeradio,layermean)
+function [layermask,absdiff]=ratioLayerFilter_yzbx(frame,layermax,layermin,layergap,rangeradio,layermean)
     [a,b,c]=size(frame);
     layerrange=layermax-layermin+2*layergap;
     absdiff=abs(double(frame)-layermean);

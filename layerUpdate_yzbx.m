@@ -58,14 +58,14 @@ function layer=layerUpdate_yzbx(layer,frame)
     layer.min=layer.min+1+randNum;
     
     
-    [~,dif]=radioLayerFilter_yzbx(frame,layer.max,layer.min,layer.gap,layer.rangeradio,layer.mean);
+    [~,dif]=ratioLayerFilter_yzbx(frame,layer.max,layer.min,layer.gap,layer.rangeratio,layer.mean);
     
-    mask3d=dif<layer.rangeradio;
+    mask3d=dif<layer.rangeratio;
     unfitRate=sum(sum(sum(mask3d)))/(a*b*3);
 %     radiomask3d=repmat(radiomask,[1,1,3]);
     
     randNum=double(rand(size(frame))<learnRate+unfitRate);
-    layer.rangeradio=layer.rangeradio+dif.*double(mask3d)-randNum.*layer.rangeradio*learnRate;
+    layer.rangeratio=layer.rangeratio+dif.*double(mask3d)-randNum.*layer.rangeratio*learnRate;
     
     if(layer.frameNum<20)  %just want to smooth the update!.
         layer.mean=(layer.mean*layer.frameNum+double(frame))/(layer.frameNum+1);
@@ -85,4 +85,23 @@ function layer=layerUpdate_yzbx(layer,frame)
     randNum=double(rand(a,b)<learnRate+unfitRate);
 %     仅对vectormask 中的vecgap进行dif更新,而对全局的vecgap进行随机更新
     layer.vecgap=layer.vecgap+double(vectormask).*dif-(layer.vecgap+dif).*double(randNum)*learnRate;
+    
+%     basevecgap...
+    [vecmask,vecdif]=tmp3(layer,frame);
+%     mask=vecdif>layer.minvecgap;
+    mask=vecdif>layer.vecgap;
+    openmask=bwareaopen(mask,5);
+    noisemask=mask&(~openmask);
+    vecdif(~noisemask)=0;
+    
+    square=strel('square',5);
+    vecdif=imdilate(vecdif,square);
+    layer.vecgap=max(layer.vecgap,vecdif);
+    
+%     vecmask=bwareaopen(vecmask,areaThreshold*10);
+%     if(sum(vecmask(:))/(a*b)<0.3)
+%         cb=getCommonBlock(layer.bw1,vecmask);
+%         layer.bw1=vecmask;
+%         layer.vecgap(cb~=0)=layer.minvecgap;
+%     end
 end

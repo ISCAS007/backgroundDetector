@@ -11,6 +11,7 @@ filenum1=length(pathlist1);
 filenamelist1={pathlist1.name};
 polys=zeros(6,10,10);
 results=zeros(8,10,10);
+gaps=zeros(6,8,8);
 for i=3:filenum1
 %    if(i<6)
 %        continue;
@@ -30,11 +31,15 @@ for i=3:filenum1
         [poly,result]=analyze(data.rgb,data.class,filename,i,j);
         polys(:,i,j)=poly(:);
         results(:,i,j)=result;
+  
+        y=vecGapAnalyze(data.rgb,data.class);
+        gaps(:,i-2,j-2)=y(:);
 %        break;
    end
+%    break;
 end
-save('analyze.mat','polys','results');
-showAnalyze(polys,results,filenamelist1);
+save('analyze.mat','polys','results','gaps');
+showAnalyze(polys,results,gaps,filenamelist1);
 
 function [poly,result]=analyze(rgb,class,filename,i,j)
 % analyze rgb and class
@@ -179,7 +184,7 @@ shortpath=path(start+1:end);
 filename=strrep(shortpath,'\','-');
 filename=[filename,'.mat'];
 
-function showAnalyze(polys,results,dataset2012)
+function showAnalyze(polys,results,gaps,dataset2012)
 % load analyze.mat;
 % load dataset2012.mat;
 
@@ -192,6 +197,7 @@ function showAnalyze(polys,results,dataset2012)
 % poly=[0,p1(2),p2(2),1,p1(1),p2(1)];
 polys=polys(:,3:end,3:end);
 results=results(:,3:end,3:end);
+
 
 
 col=zeros(1,8);
@@ -237,3 +243,90 @@ for i=1:8
         set(t,'Position',[30,30,50+8*wid,200]);
     end
 end
+
+gcname={'fmin','fmean','fmax','bmin','bmean','bmax'};
+for i=1:8
+    data=gaps(:,i,:);
+    data=reshape(data,6,8);
+    data=data';
+    if(sum(data(:))>0)
+        figure('Name',[dataset2012{i+2},' gaps']);
+        t=uitable('data',data);
+        set(t,'columnWidth',{wid});
+%         set(t,'columnFormat',cfor);
+        set(t,'columnName',gcname);
+        set(t,'Position',[30,30,50+8*wid,200]);
+    end
+end
+
+function y=vecGapAnalyze(rgb,class)
+% 分析vecgap 的最大值，最小值，平均值等情况
+[a,b,c,d]=size(rgb);
+layermean=double(rgb(:,:,:,1));
+fmax=-1;
+fmin=-1;
+fmean=-1;
+bmax=-1;
+bmin=-1;
+bmean=-1;
+for frameNum=2:d
+   frame=rgb(:,:,:,frameNum);
+   
+%    unknown=find(class(3,3,1,:)==170);
+%    motion=find(class(3,3,1,:)==255);
+%    shadow=find(class(3,3,1,:)==50);
+%    static=find(class(3,3,1,:)==0);
+   
+   mask=class(:,:,:,frameNum);
+    layerlight=sqrt(max(sum(layermean.^2,3),1));
+    framelight=sqrt(max(sum(frame.^2,3),1));
+
+    ff=double(frame);
+    for i=3:-1:1
+       layermean(:,:,i)=layermean(:,:,i)./layerlight;
+       ff(:,:,i)=ff(:,:,i)./framelight;
+    end
+    
+    vecdif=cross(ff,layermean,3);
+    vecdif=sum(vecdif.^2,3);
+    
+    %    foreground
+    motion=(mask==255);
+    motion=motion(:);
+    if(any(motion))
+        if(fmax==-1)
+            fmax=max(vecdif(motion));
+            fmin=min(vecdif(motion));
+            fmean=mean(vecdif(motion));
+        else
+            fmax=max(fmax,max(vecdif(motion)));
+            fmin=min(fmin,min(vecdif(motion)));
+%             fmean=(fmean*(frameNum-1)+mean(vecdif(motion)))/frameNum;
+            fmean=fmean*0.95+mean(vecdif(motion))*0.5;
+        end
+    end
+    
+%     background 
+    static=(mask==0);
+    static=static(:);
+    if(any(static))
+        if(bmax==-1)
+            bmax=max(vecdif(static));
+            bmin=min(vecdif(static));
+            bmean=mean(vecdif(static));
+        else
+            bmax=max(bmax,max(vecdif(static)));
+            bmin=min(bmin,min(vecdif(static)));
+%             bmean=(bmean*(frameNum-1)+mean(vecdif(static)))/frameNum;
+            bmean=bmean*0.95+mean(vecdif(static))*0.5;
+        end
+    end
+    
+   if(frameNum<20)
+       layermean=(layermean*(frameNum-1)+double(frame))/frameNum;
+   else
+       layermean=layermean*0.95+0.05*double(frame);
+   end
+end
+
+y=[fmin,fmean,fmax,bmin,bmean,bmax];
