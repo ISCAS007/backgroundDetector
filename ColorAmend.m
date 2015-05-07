@@ -5,5 +5,5 @@ function CAmask=ColorAmend(layermask,frame,layer)
     CAmask=bwareaopen(CAmask,round(areaThreshold));
     Layermask=layerFilter2(frame,layer);
     
-    maskMerge_yzbx(CAmask,Layermask);
+    CAmask=maskMerge_yzbx(CAmask,Layermask);
 end
