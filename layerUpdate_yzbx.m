@@ -104,4 +104,28 @@ function layer=layerUpdate_yzbx(layer,frame)
 %         layer.bw1=vecmask;
 %         layer.vecgap(cb~=0)=layer.minvecgap;
 %     end
+
+function [noise,obj]=getNoiseObj2d(mask,minarea)
+obj=bwareaopen(mask,minarea);
+noise=mask-obj;
+obj=imerode(obj,strel('square',3));
+noise=imdilate(noise,strel('square',5));
+
+function gap=adajustGap2d(gap,dif,minarea,maskratio,noiseratio)
+[a,b]=size(gap);
+loop=0;
+while loop<100
+    loop=loop+1;
+    mask=dif>gap;
+    [noise,obj]=getNoiseObj2d(mask,minarea);
+    mm=sum(mask(:))/a*b;
+    if(any(obj))
+       if(mm>=maskratio(1)&&mm<=maskratio(2))
+          nn=sum(noise(:))/sum(mask(:));
+          if(nn>=noiseratio(1)&&nn<=noiseratio(2))
+            break; 
+          end
+       end
+    end
+    
 end

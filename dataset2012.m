@@ -17,7 +17,7 @@ for i=3:filenum1
 %           continue;
 %        end
        path=[root,'\',filenamelist1{i},'\',filenamelist2{j}];
-       pathlist3=dir([path,'\input']);
+%        pathlist3=dir([path,'\input']);
 %        filenum3=length(pathlist3);
 %        filenamelist3={pathlist3.name};
 %        
