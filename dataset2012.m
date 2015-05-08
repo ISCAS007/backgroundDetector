@@ -1,4 +1,5 @@
 function dataset2012()
+% 对数据集dataset2012进行遍历的标准设置
 root='D:\firefoxDownload\matlab\dataset2012\dataset';
 % layernum=3;
 pathlist1=dir(root);
@@ -25,9 +26,10 @@ for i=3:filenum1
 %        filenamelist4={pathlist4.name};
 %        filename=path2filename(path);
        
-       roiframeNum=load([path,'\temporalROI.txt']);
+       % roiframeNum=load([path,'\temporalROI.txt']);
 %        frameNum=0;
-       multiObjectTracking_yzbx(path,roiframeNum);
+       % multiObjectTracking_yzbx(path,roiframeNum);
+	   ReverseMatching(path);
        break;
    end
    break;

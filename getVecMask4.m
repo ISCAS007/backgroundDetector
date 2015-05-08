@@ -1,6 +1,9 @@
-function [mask,vecdif]=getVecgapMask(layer,frame)
+function [mask,vecdif]=getVecMask4(layer,frame)
 layermean=layer.mean;
-vecgap=layer.vecgap;
+vecgap=layer.vecdifratio;
+vecmean=layer.vecdifmean;
+vecmax=layer.vecdifmax;
+vecmin=layer.vecdifmin;
 layerlight=sqrt(max(sum(layermean.^2,3),1));
 framelight=sqrt(max(sum(frame.^2,3),1));
 
@@ -15,7 +18,7 @@ end
 
 vecdif=cross(layermean,ff,3);
 vecdif=sum(vecdif.^2,3);
-% m=max(vecdif(:));
-% mask=vecdif/m;
-% mask=imadjust(mask);
-mask=vecdif>vecgap;
+
+% vecdif=(vecdif-vecmean)./(vecmax-vecmin);
+% mask=vecdif>vecgap;
+mask=vecdif>vecmax;

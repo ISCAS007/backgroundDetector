@@ -1,63 +1,49 @@
 function layer=layerUpdate_yzbx(layer,frame)
+    frameNum=layer.frameNum;
     [a,b,c]=size(frame);
     areaThreshold=round(a*b/1000);
-    
-    [mask,maxdif,mindif]=maxminGapLayerFilter_yzbx(frame,layer.max,layer.min,layer.gap);
-    
-    mask3d=(maxdif<0)&(mindif>0);
-    unfitRate=sum(sum(sum(mask3d)))/(a*b*c);
-    layer.mmgnoise(1)=layer.mmgnoise(2);
-    openmask=bwareaopen(mask,areaThreshold);
-    noisemask=mask&(~openmask);
-    layer.mmgnoise(2)=sum(noisemask(:))/areaThreshold;
-    
-    if(layer.mmgnoise(2)>10)
-        
-        if(layer.mmgnoise(2)>layer.mmgnoise(1))
-           layer.gapinc=min(100,layer.gapinc*2);
-        else 
-            layer.gapinc=layer.gapinc*0.95;
-        end
-        disp('big mmgnoise');
-        frameNum=layer.frameNum
-        mmgnoise=layer.mmgnoise(2)
-        gapinc=layer.gapinc
-        meangap=mean(layer.gap(:))
+    learnRate=layer.a;
+ 
+    %%%%%%%%%%%%%%%%%%%%%%%%gap update
+    if(frameNum==1)
+        dif=max(double(frame)-layer.max,layer.min-double(frame));
+        minarea=areaThershold;
+        maskratio=[0.3,0.5];
+        noiseratio=[0.3,0.5];
+        layer.gap=adajustGap2d(layer.gap,dif,minarea,maskratio,noiseratio);
     else
-        layer.gapinc=layer.gapinc*0.9;
-        disp('little mmgnoise');
-        frameNum=layer.frameNum
-        mmgnoise=layer.mmgnoise(2)
-        gapinc=layer.gapinc
-        meangap=mean(layer.gap(:))
+        [mask1,dif1max,dif1min]=maxminGapLayerFilter_yzbx(frame,layer.max,layer.min,layer.gap);
+        dif1=max(dif1max,dif1min);
+        
+        obj=imopen(mask1,strel('disk',5,8));
+        noise=mask1&(~obj);
+        
+%         layer.gap=layer.gap*0.99;
+        layer.gap=layer.gap-1;
+        
+        gapextent=dif1;
+        gapextent(~noise)=0;
+        noise=imdilate(noise,strel('disk',5,8));
+        gapextent=imdilate(gapextent,strel('disk',5,8));
+        noise=noise&(~obj);
+%         gapextent(obj)=0;
+        
+        layer.gap(noise)=max(layer.gap(noise),gapextent(noise));
     end
-    %area(layermask)/width/height+(labda-1)/30=1;
-%     lambda=1-(sum(sum(layermask)))/(a*b);
-%     %layer.layergap in [0,255]
-%     %lambda in [1,20]
-%     lambda=1+uint8(lambda*20);
-    maxdif(maxdif>0)=0;
-    mindif(mindif<0)=0;
-    gapdif=max(-maxdif,mindif);
-    gapdif=min(gapdif,10);
     
-    learnRate=0.05;
-    randNum=double(rand(size(frame))<learnRate);
-    mask=repmat(mask,[1,1,3]);
-    layer.gap=layer.gap+double(mask).*(gapdif+layer.gapinc);
-%     layer.gap=layer.gap-randNum.*layer.gap*learnRate;
-    layer.gap=layer.gap-1-randNum;
+%     layer.gap in [0~20]
+    gaplarge20=layer.gap>20;
+    gapless5=layer.gap<1;
+    layer.max(gaplarge20)=min(10+layer.max(gaplarge20),255);
+    layer.min(gaplarge20)=max(0,layer.min(gaplarge20)-10);
+    layer.gap(gaplarge20)=layer.gap(gaplarge20)-10;
     
-    randNum=double(rand(size(frame))<learnRate);
-    layer.max=max(layer.max,double(frame));
-%     layer.max=layer.max-randNum.*layer.max*learnRate;
-    layer.max=layer.max-1-randNum;
-    randNum=double(rand(size(frame))<learnRate);
-    layer.min=min(layer.min,double(frame));
-%     layer.min=layer.min+randNum.*layer.min*learnRate;
-    layer.min=layer.min+1+randNum;
+    layer.max(gapless5)=max(layer.max(gapless5)-10,0);
+    layer.min(gapless5)=min(255,layer.min(gapless5)+10);
+    layer.gap(gapless5)=layer.gap(gapless5)+10;
+ 
     
-    
+    %%%%%%%%%%%%%%%%%%%%%%ratio update 
     [~,dif]=ratioLayerFilter_yzbx(frame,layer.max,layer.min,layer.gap,layer.rangeratio,layer.mean);
     
     mask3d=dif<layer.rangeratio;
@@ -79,25 +65,56 @@ function layer=layerUpdate_yzbx(layer,frame)
     layer.pmaxnum=layer.pmaxnum+uint32(pmaxsetMask)-uint32(randNum);
     layer.pminnum=layer.pminnum+uint32(pminsetMask)-uint32(randNum);
     
-    [vectormask,dif]=vectorLayerMask_yzbx(frame,vecMask,layer.pminSetMean,layer.pmaxSetMean,layer.mean,layer.vecgap);
-    unfitRate=sum(sum(vectormask))/(sum(sum(vecMask))+1);
-%     减慢学习速度，防止前景消融的情况,待实验检验效果
-    randNum=double(rand(a,b)<learnRate+unfitRate);
-%     仅对vectormask 中的vecgap进行dif更新,而对全局的vecgap进行随机更新
-    layer.vecgap=layer.vecgap+double(vectormask).*dif-(layer.vecgap+dif).*double(randNum)*learnRate;
+    %%%%%%%%%%%%%%%%%%%%%%vec gap update
     
-%     basevecgap...
-    [vecmask,vecdif]=tmp3(layer,frame);
-%     mask=vecdif>layer.minvecgap;
-    mask=vecdif>layer.vecgap;
-    openmask=bwareaopen(mask,5);
-    noisemask=mask&(~openmask);
-    vecdif(~noisemask)=0;
+    if(frameNum==1)
+        [~,dif]=getVecgapMask(layer,frame);
+        minarea=areaThershold;
+        maskratio=[0.3,0.5];
+        noiseratio=[0.3,0.5];
+        layer.vecgap=adajustGap2d(layer.vecgap,dif,minarea,maskratio,noiseratio);
+    else
+        [mask3,dif3]=getVecgapMask(layer,frame)
+        
+        obj=imopen(mask3,strel('disk',5,8));
+        noise=mask3&(~obj);
+        
+        layer.vecgap=layer.vecgap*0.99;
+        
+        gapextent=dif3;
+        gapextent(~noise)=0;
+        noise=imdilate(noise,strel('disk',5,8));
+        gapextent=imdilate(gapextent,strel('disk',5,8));
+        noise=noise&(~obj);
+%         gapextent(obj)=0;
+        
+        layer.gap(noise)=max(layer.gap(noise),gapextent(noise));
+    end
     
-    square=strel('square',5);
-    vecdif=imdilate(vecdif,square);
-    layer.vecgap=max(layer.vecgap,vecdif);
     
+    %%%%%%%%%%%%%%%%%%%%%%%vec ratio update
+    
+        
+%     [vectormask,dif]=vectorLayerMask_yzbx(frame,vecMask,layer.pminSetMean,layer.pmaxSetMean,layer.mean,layer.vecgap);
+%     unfitRate=sum(sum(vectormask))/(sum(sum(vecMask))+1);
+% %     减慢学习速度，防止前景消融的情况,待实验检验效果
+%     randNum=double(rand(a,b)<learnRate+unfitRate);
+% %     仅对vectormask 中的vecgap进行dif更新,而对全局的vecgap进行随机更新
+%     layer.vecgap=layer.vecgap+double(vectormask).*dif-(layer.vecgap+dif).*double(randNum)*learnRate;
+%     
+% %     basevecgap...
+%     [vecmask,vecdif]=tmp3(layer,frame);
+% %     mask=vecdif>layer.minvecgap;
+%     mask=vecdif>layer.vecgap;
+%     openmask=bwareaopen(mask,5);
+%     noisemask=mask&(~openmask);
+%     vecdif(~noisemask)=0;
+%     
+%     square=strel('square',5);
+%     vecdif=imdilate(vecdif,square);
+%     layer.vecgap=max(layer.vecgap,vecdif);
+    
+
 %     vecmask=bwareaopen(vecmask,areaThreshold*10);
 %     if(sum(vecmask(:))/(a*b)<0.3)
 %         cb=getCommonBlock(layer.bw1,vecmask);

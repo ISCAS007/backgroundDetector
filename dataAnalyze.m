@@ -27,6 +27,12 @@ for i=3:filenum1
        filename=path2filename(path);
 %        fullname=['mat\',filename];
        data=load(filename);
+	   
+	   light=sum(data.rgb.^2,3);
+	   light=max(light,1);
+	   light=repmat(light,[1,1,3,1]);
+	   data.rgb=data.rgb./light;
+	   
 %      save(path2filename(path),'roipoint','rgb','class','path');
         [poly,result]=analyze(data.rgb,data.class,filename,i,j);
         polys(:,i,j)=poly(:);
@@ -162,6 +168,7 @@ else
     legend('static','unknown','motion','shadow','fit line');
     
     saveas(h,[filename(1:end-4),'-rgb'],'jpg');
+	close(h);
 %     r=rr;
 %     h=figure,scatter(static,r(static),5,'red'),title([filename,'-r_static']);
 %     hold on,plot(1:d,r);
@@ -214,12 +221,13 @@ for i=1:8
         data=reshape(data,6,8);
         data=data';
         col(i)=sum(data(:,4));
-        figure('Name',[dataset2012{i+2},' polys']);
+        hp=figure('Name',[dataset2012{i+2},' polys']);
         t=uitable('data',data(1:col(i),:));
         set(t,'columnWidth',{wid});
         set(t,'columnFormat',cfor);
         set(t,'columnName',pcname);
         set(t,'Position',[30,30,50+6*wid,200]);
+		saveas(hp,[dataset2012{i+2},'_polys'],'jpg');
     end
 end
 
@@ -235,12 +243,14 @@ for i=1:8
         data=data';
         data(:,7:8)=data(:,7:8)*100;
 %         uitable('data',data);
-        figure('Name',[dataset2012{i+2},' results']);
+        hr=figure('Name',[dataset2012{i+2},' results']);
         t=uitable('data',data(1:col(i),:));
         set(t,'columnWidth',{wid});
         set(t,'columnFormat',cfor);
         set(t,'columnName',rcname);
         set(t,'Position',[30,30,50+8*wid,200]);
+		saveas(hr,[dataset2012{i+2},'_results'],'jpg');
+		
     end
 end
 
@@ -250,12 +260,13 @@ for i=1:8
     data=reshape(data,6,8);
     data=data';
     if(sum(data(:))>0)
-        figure('Name',[dataset2012{i+2},' gaps']);
+        hg=figure('Name',[dataset2012{i+2},' gaps']);
         t=uitable('data',data);
         set(t,'columnWidth',{wid});
 %         set(t,'columnFormat',cfor);
         set(t,'columnName',gcname);
         set(t,'Position',[30,30,50+8*wid,200]);
+		saveas(hg,[dataset2012{i+2},'_gaps'],'jpg');
     end
 end
 
