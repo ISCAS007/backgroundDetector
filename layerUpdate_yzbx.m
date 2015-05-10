@@ -6,11 +6,11 @@ function layer=layerUpdate_yzbx(layer,frame)
  
     %%%%%%%%%%%%%%%%%%%%%%%%gap update
     if(frameNum==1)
-        dif=max(double(frame)-layer.max,layer.min-double(frame));
+        dif1=max(double(frame)-layer.max,layer.min-double(frame));
         minarea=areaThershold;
         maskratio=[0.3,0.5];
         noiseratio=[0.3,0.5];
-        layer.gap=adajustGap2d(layer.gap,dif,minarea,maskratio,noiseratio);
+        layer.gap=adajustGap2d(layer.gap,dif1,minarea,maskratio,noiseratio);
     else
         [mask1,dif1max,dif1min]=maxminGapLayerFilter_yzbx(frame,layer.max,layer.min,layer.gap);
         dif1=max(dif1max,dif1min);
@@ -44,6 +44,12 @@ function layer=layerUpdate_yzbx(layer,frame)
  
     
     %%%%%%%%%%%%%%%%%%%%%%ratio update 
+	% if(frameNum==1)
+		% dif2=double(frame)./max(layer.mean,1);
+		
+	% else
+	
+	% end
     [~,dif]=ratioLayerFilter_yzbx(frame,layer.max,layer.min,layer.gap,layer.rangeratio,layer.mean);
     
     mask3d=dif<layer.rangeratio;
@@ -68,11 +74,11 @@ function layer=layerUpdate_yzbx(layer,frame)
     %%%%%%%%%%%%%%%%%%%%%%vec gap update
     
     if(frameNum==1)
-        [~,dif]=getVecgapMask(layer,frame);
+        [~,dif3]=getVecgapMask(layer,frame);
         minarea=areaThershold;
         maskratio=[0.3,0.5];
         noiseratio=[0.3,0.5];
-        layer.vecgap=adajustGap2d(layer.vecgap,dif,minarea,maskratio,noiseratio);
+        layer.vecgap=adajustGap2d(layer.vecgap,dif3,minarea,maskratio,noiseratio);
     else
         [mask3,dif3]=getVecgapMask(layer,frame)
         
@@ -88,12 +94,36 @@ function layer=layerUpdate_yzbx(layer,frame)
         noise=noise&(~obj);
 %         gapextent(obj)=0;
         
-        layer.gap(noise)=max(layer.gap(noise),gapextent(noise));
+        % layer.gap(noise)=max(layer.gap(noise),gapextent(noise));
+		layer.vecgap(noise)=max(layer.vecgap(noise),gapextent(noise));
     end
     
     
     %%%%%%%%%%%%%%%%%%%%%%%vec ratio update
-    
+    if(frameNum==1)
+        [~,dif4]=getVecMask4(layer,frame);
+        minarea=areaThershold;
+        maskratio=[0.3,0.5];
+        noiseratio=[0.3,0.5];
+        layer.vecdifmax=adajustGap2d(layer.vecdifmax,dif3,minarea,maskratio,noiseratio);
+    else
+        [mask4,dif4]=getVecMask4(layer,frame)
+        
+        obj=imopen(mask4,strel('disk',5,8));
+        noise=mask4&(~obj);
+        
+        layer.vecdifmax=layer.vecdifmax*0.99;
+        
+        gapextent=dif4;
+        gapextent(~noise)=0;
+        noise=imdilate(noise,strel('disk',5,8));
+        gapextent=imdilate(gapextent,strel('disk',5,8));
+        noise=noise&(~obj);
+%         gapextent(obj)=0;
+        
+        % layer.gap(noise)=max(layer.gap(noise),gapextent(noise));
+		layer.vecdifmax(noise)=max(layer.vecdifmax(noise),gapextent(noise));
+    end
         
 %     [vectormask,dif]=vectorLayerMask_yzbx(frame,vecMask,layer.pminSetMean,layer.pmaxSetMean,layer.mean,layer.vecgap);
 %     unfitRate=sum(sum(vectormask))/(sum(sum(vecMask))+1);

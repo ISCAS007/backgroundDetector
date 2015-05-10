@@ -28,8 +28,8 @@ for i=3:filenum1
        
        % roiframeNum=load([path,'\temporalROI.txt']);
 %        frameNum=0;
-       % multiObjectTracking_yzbx(path,roiframeNum);
-	   ReverseMatching(path);
+       multiObjectTracking_yzbx(path);
+% 	   ReverseMatching(path);
        break;
    end
    break;
