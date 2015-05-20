@@ -6,6 +6,7 @@ obj = setupSystemObjects();
 
 tracks = initializeTracks(); % create an empty array of tracks
 roiframeNum=load([path,'\temporalROI.txt']);
+roiframeNum=[1,200];
 nextId = 1; % ID of the next track
 frameNum=0;
 layer=[];

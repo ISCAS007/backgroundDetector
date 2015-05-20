@@ -9,7 +9,8 @@ frame=getNextFrame();
 [width,height,channel]=size(frame);
 imageLen=width*height;
 %cb,numEntries,t
-CB=struct('t',0,'numEntries',0,'cb',{});
+% codebook use global config;
+CB(width*height)=struct('t',0,'numEntries',0,'cb',{});
 for cbj=1:width*height
     CB(cbj).t=0;    %t CB(c).t=CB(c).t
     CB(cbj).numEntries=uint8(0);    %numEntries CB(c).numEntries=CB(c).numEntries

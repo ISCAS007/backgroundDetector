@@ -32,15 +32,15 @@ function layer=layerUpdate_yzbx(layer,frame)
     end
     
 %     layer.gap in [0~20]
-    gaplarge20=layer.gap>20;
-    gapless5=layer.gap<1;
-    layer.max(gaplarge20)=min(10+layer.max(gaplarge20),255);
-    layer.min(gaplarge20)=max(0,layer.min(gaplarge20)-10);
-    layer.gap(gaplarge20)=layer.gap(gaplarge20)-10;
+    % gaplarge20=layer.gap>20;
+    % gapless5=layer.gap<1;
+    % layer.max(gaplarge20)=min(10+layer.max(gaplarge20),255);
+    % layer.min(gaplarge20)=max(0,layer.min(gaplarge20)-10);
+    % layer.gap(gaplarge20)=layer.gap(gaplarge20)-10;
     
-    layer.max(gapless5)=max(layer.max(gapless5)-10,0);
-    layer.min(gapless5)=min(255,layer.min(gapless5)+10);
-    layer.gap(gapless5)=layer.gap(gapless5)+10;
+    % layer.max(gapless5)=max(layer.max(gapless5)-10,0);
+    % layer.min(gapless5)=min(255,layer.min(gapless5)+10);
+    % layer.gap(gapless5)=layer.gap(gapless5)+10;
  
     
     %%%%%%%%%%%%%%%%%%%%%%ratio update 
