@@ -32,7 +32,7 @@ for i=7:filenum1
         filenamelist4={pathlist4.name};
         
         layer=[];
-        while frameNum<500
+        while frameNum<150
            readFrame();
            [layer,mask]=mixtureSubstraction(layer,input);
            showFrame();
@@ -40,7 +40,7 @@ for i=7:filenum1
         
         break;
     end
-    %     break;
+        break;
 end
 
     function readFrame()
@@ -52,8 +52,8 @@ end
     end
 
     function showFrame()
-       subplot(234);imshow(input);
-       subplot(235);imshow(gtruth);
-       subplot(236);imshow(mask);
+       subplot(434);imshow(input);title(['input',num2str(frameNum)]);
+       subplot(435);imshow(gtruth);title('groundtruth');
+       subplot(436);imshow(mask);title('mixtureMask');
     end
 end
