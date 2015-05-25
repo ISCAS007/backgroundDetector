@@ -47,11 +47,11 @@ for i=3:filenum1
         layer=[];
         while frameNum<=over(num)
            readFrame();
-           [layer,mask]=mixtureSubstraction(layer,input);
+           [layer,mask]=mixtureSubstraction2(layer,input);
            showFrame();
         end
         hmask=figure;
-        imshow(mask);
+        imshow(mask_yzbx(input,mask));
         saveas(hmask,filenamelist2{3},'jpg');
         close(hmask);
         break;
@@ -70,7 +70,7 @@ end
     function showFrame()
        subplot(434);imshow(input);title(['input',num2str(frameNum)]);
        subplot(435);imshow(gtruth);title('groundtruth');
-       subplot(436);imshow(mask);title('mixtureMask');
+       subplot(436);imshow(mask_yzbx(input,mask));title('mixtureMask');
        
     end
 end
