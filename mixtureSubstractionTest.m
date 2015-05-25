@@ -3,7 +3,7 @@
 % filename='dataset2012\dataset\dynamicBackground\boats';
 % outputpath=strrep(filename,'\','.');
 % layerAlgrithm([inputpath,'\',filename],['analyze\',outputpath,'.mat']);
-function run()
+function mixtureSubstractionTest()
 root='D:\firefoxDownload\matlab\dataset2012\dataset';
 % layernum=3;
 pathlist1=dir(root);

@@ -2,11 +2,15 @@ function multiObjectTracking_yzbx(path)
 
 % create system objects used for reading video, detecting moving objects,
 % and displaying the results
+% path='D:\firefoxDownload\matlab\dataset2012\dataset\baseline\PETS2006';
+% path='D:\firefoxDownload\matlab\dataset2012\dataset\dynamicBackground\fall';
+% path='D:\firefoxDownload\matlab\dataset2012\dataset\shadow\backdoor';
+path='D:\firefoxDownload\matlab\dataset2012\dataset\intermittentObjectMotion\sofa';
 obj = setupSystemObjects();
 
 tracks = initializeTracks(); % create an empty array of tracks
 roiframeNum=load([path,'\temporalROI.txt']);
-roiframeNum=[1,200];
+roiframeNum=[1,360];
 nextId = 1; % ID of the next track
 frameNum=0;
 layer=[];
@@ -16,7 +20,7 @@ frame=readFrame();
 [a,b,c]=size(frame);
 frameNum=0;
 % detect moving objects, and track them across video frames
-while frameNum+roiframeNum(1)<roiframeNum(2)
+while frameNum+roiframeNum(1)<=roiframeNum(2)
     frame = readFrame();
     [centroids, bboxes, mask] = detectObjects(frame);
     predictNewLocationsOfTracks();
@@ -30,7 +34,7 @@ while frameNum+roiframeNum(1)<roiframeNum(2)
 
     displayTrackingResults();
 end
-
+frameNum
 
 %% Create System Objects
 % Create System objects used for reading the video frames, detecting
@@ -48,8 +52,8 @@ end
 
         % create two video players, one to display the video,
         % and one to display the foreground mask
-        obj.videoPlayer = vision.VideoPlayer('Position', [20, 400, 700, 400]);
-        obj.maskPlayer = vision.VideoPlayer('Position', [740, 400, 700, 400]);
+        obj.videoPlayer = vision.VideoPlayer('Position', [20, 200, 700, 400]);
+        obj.maskPlayer = vision.VideoPlayer('Position', [740, 200, 700, 400]);
 
         % Create system objects for foreground detection and blob analysis
 
@@ -97,10 +101,12 @@ end
     function [centroids, bboxes, mask] = detectObjects(frame)
 
         if(frameNum==1)
-          layer=layerInit(frame);
-          mask=false(a,b);
+%           layer=layerInit(frame);
+%           mask=false(a,b);
+            [layer,mask]=mixtureSubstraction(layer,frame);
         else
-          [layer,mask]=layerStep(layer,frame);
+%           [layer,mask]=layerStep(layer,frame);
+            [layer,mask]=mixtureSubstraction(layer,frame);
         end
 
         % detect foreground
