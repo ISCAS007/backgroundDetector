@@ -2,7 +2,7 @@ function [layer,mixtureMask]=mixtureSubstraction2(layer,frame)
 % init and update layer at the same time
     [a,b,c]=size(frame);
     [vector,light]=norm_yzbx();
-    tmpMask=false(a,b);
+    tmpMask=edge(light,'canny');
     se=strel('disk',3);
     if(isempty(layer))
        layer=init(); 
@@ -22,25 +22,28 @@ function [layer,mixtureMask]=mixtureSubstraction2(layer,frame)
     function [vector,light]=norm_yzbx()
         vector=double(frame);
         light=sqrt(sum(vector.^2,3));
-        light=medfilt2(light,[5,5]);
+        
         not0=(light~=0);
         not0=repmat(not0,[1,1,3]);
         light3d=repmat(light,[1,1,3]);
         
         vector(~not0)=0;
         vector(not0)=vector(not0)./light3d(not0);
+        
+        light=rgb2gray(frame);
+        light=medfilt2(light,[5,5]);
+        light=imadjust(light);
     end
 
     function maskShow()
         subplot(431);imshow(lightMask);title('lightMask');
         subplot(432);imshow(softMask);title('softMask');
         subplot(433);imshow(hardMask);title('hardMask');
-        subplot(437);imshow(layer.lightMax/765);title('lightMax');
+        subplot(437);imshow(layer.lightMax);title('lightMax');
         subplot(438);imshow(layer.SoftModel);title('SoftModel');
         subplot(439);imshow(layer.HardModel);title('HardModel');
-        subplot(4,3,10);imshow(light/765);title('light');
+        subplot(4,3,10);imshow(light);title('light');
         subplot(4,3,11);imshow(vector);title('vector');
-%         subplot(4,3,12);imshow(tmpMask);title('maxv|minv');
         subplot(4,3,12);imshow(tmpMask);title('tmpMask');
     end
 
@@ -81,7 +84,6 @@ function [layer,mixtureMask]=mixtureSubstraction2(layer,frame)
         if(layer.frameNum>layer.trainNum)
 %             lightMask=imopen(lightMask,se);
 %             lightMask=imfill(lightMask,'holes');
-%             tmpMask=medfilt2(lightMask,[5,5]);
         end
 %         lightMask=bwareaopen(lightMask,layer.minArea);
         lightMask=medfilt2(lightMask,[5,5]);
@@ -111,7 +113,6 @@ function [layer,mixtureMask]=mixtureSubstraction2(layer,frame)
         andmask=hardMask&lightMask;
         ormask=(hardMask|lightMask)&(~shadowMask);
         mask=imreconstruct(andmask,ormask);
-        tmpMask=mask;
     end
 
     function mixtureMask=getMixtureMask()
@@ -154,7 +155,6 @@ function [layer,mixtureMask]=mixtureSubstraction2(layer,frame)
         
         maxv=layer.lightMaxCount>20;
         minv=layer.lightMinCount>20;
-%         tmpMask=maxv|minv;
         
         layer.lightMaxCount(maxv)=10;
         layer.lightMinCount(minv)=10;
@@ -171,7 +171,6 @@ function [layer,mixtureMask]=mixtureSubstraction2(layer,frame)
         
         vc=layer.distanceMaxCount>20;
         layer.distanceMaxCount(vc)=10;
-%         tmpMask=vc;
         
         layer.distanceMax(vc)=layer.distanceMax(vc)*(1-layer.learnRate);
         
