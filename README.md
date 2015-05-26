@@ -34,5 +34,9 @@ background substraction
 3. 中期不成熟的函数
 	vectorLayerMask_yzbx: 求向量差mask,但归一化是利用(1,b/r,g/r)
 	vectorFrameDiffer_yzbx:	综合上下界及向量差，归一化利用(1,b/r,g/r)
+
+# 相关工作
+在github 上搜索关键词 background subtraction, foreground detection 等
+其中最著名的一个是bgslibrary
 	
 	
