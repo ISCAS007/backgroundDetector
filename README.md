@@ -1,4 +1,14 @@
+# background visulization
+2015年6月16日:
+edgeAnalyse.m  :分析边
+LBP.m  : 分析local binary pattern 直方图
+localWave.m : 分析局部像素之间的关系
+PBAS.m：分析PBAS算法的背景模型s
+shadowAnalyse.m：分析阴影的直方图s
+
+
 # backgroundDetector
+
 background substraction
 
 1. color segmentation
