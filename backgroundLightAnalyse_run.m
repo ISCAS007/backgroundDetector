@@ -1,4 +1,4 @@
-K=40;
+K=3;
 x=zeros(K,1);
 y=zeros(K,1);
 for count=1:K
@@ -28,13 +28,18 @@ for count=1:K
     
     idx=(staticPixel3d(:,1)~=-1);
     set=staticPixel3d(idx,:);
-    [set,~]=vectorNorm_yzbx(set);
-    subplot(133),scatter3(set(:,1),set(:,2),set(:,3)),title('static-motion-rgb-norm');
+%     [set,~]=vectorNorm_yzbx(set);
+%     subplot(133),scatter3(set(:,1),set(:,2),set(:,3)),title('static-motion-rgb-norm');
+    set=rgb2sphere(set);
+    subplot(133),scatter(set(:,1),set(:,2)),title('static-motion-rgb-norm');
+
     hold on;
     idx=(motionPixel3d(:,1)~=-1);
     set=motionPixel3d(idx,:);
-    [set,~]=vectorNorm_yzbx(set);
-    scatter3(set(:,1),set(:,2),set(:,3)),legend('static','motion','Location','SouthOutside');
+%     [set,~]=vectorNorm_yzbx(set);
+%     scatter3(set(:,1),set(:,2),set(:,3)),legend('static','motion','Location','SouthOutside');
+    set=rgb2sphere(set);
+    scatter(set(:,1),set(:,2)),legend('static','motion','Location','SouthOutside');
 
 end
 

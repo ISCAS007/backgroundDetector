@@ -4,7 +4,8 @@
 % outside roi=85,unknown=170,motion=255,hard shadow=50,static=0
 % 突然停止的目标将逐渐融入背景
 function dataAnalyze()
-root='D:\firefoxDownload\matlab\dataset2012\dataset';
+% root='D:\firefoxDownload\matlab\dataset2012\dataset';
+root='D:\Program\matlab\dataset2012\dataset';
 % layernum=3;
 pathlist1=dir(root);
 filenum1=length(pathlist1);
@@ -25,6 +26,7 @@ for i=3:filenum1
 %        end
        path=[root,'\',filenamelist1{i},'\',filenamelist2{j}];
        filename=path2filename(path);
+       display(filename);
 %        fullname=['mat\',filename];
        data=load(filename);
 	   
@@ -42,7 +44,7 @@ for i=3:filenum1
         gaps(:,i-2,j-2)=y(:);
 %        break;
    end
-%    break;
+   break;
 end
 save('analyze.mat','polys','results','gaps');
 showAnalyze(polys,results,gaps,filenamelist1);
@@ -185,7 +187,8 @@ end
 
 % path2filename
 function filename=path2filename(path)
-root='D:\firefoxDownload\matlab\dataset201*\dataset\';
+% root='D:\firefoxDownload\matlab\dataset201*\dataset\';
+root='D:\Program\matlab\dataset2012\dataset\';
 start=length(root);
 shortpath=path(start+1:end);
 filename=strrep(shortpath,'\','-');
