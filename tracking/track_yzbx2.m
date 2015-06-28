@@ -1,4 +1,4 @@
-function track_yzbx()
+function track_yzbx2()
 maskpath='D:\Program\matlab\bgslibrary_mfc\outputs\foreground';
 inputpath='D:\Program\matlab\bgslibrary_mfc\outputs\input';
 
@@ -14,7 +14,7 @@ mask=getFrame(maskpath,masklist,frameNum);
 [height,width]=size(mask);
 minarea=floor(height*width/1000);
 
-param=getKalmanParam();
+% param=getKalmanParam();
 oldblob={};
 newblob={};
 blobInit=false;
@@ -22,10 +22,12 @@ mingroupid=1;
 groupid=1;
 blobid=1;
 minblobid=0;
-groupinfo.boudary=zeros(0,4);
+groupinfo.boundary=zeros(0,4);
 groupinfo.center=zeros(0,2);
 groupinfo.group=zeros(0,1);
+groupinfo.time=zeros(0,1);
 maxdistmat=[];
+
 for frameNum=450:fileNum
     input=getFrame(inputpath,inputlist,frameNum);
     mask=getFrame(maskpath,masklist,frameNum);
@@ -50,38 +52,62 @@ for frameNum=450:fileNum
     newblob.lostcount=zeros(tmp,1);
     output_yzbx(newblob);
     
-    [newblob,oldblob,pair,featuredeleteidx]=blobMatchAndUpdate(newblob,oldblob);
+    [newblob,oldblob,pair,featuredeleteidx]=blobFeatureUpdate(newblob,oldblob);
     
     output_yzbx(oldblob);
-    oldblob=featureGrounpUpdate(newblob,oldblob,pair);
+    oldblob=groupMergeAndSplit(newblob,oldblob,pair);
     
     output_yzbx(oldblob);
-    %     oldblob.feature=oldblob.feature(~featuredeleteidx,:);
-    %     oldblob.status=oldblob.status(~featuredeleteidx);
-    %     oldblob.lostcount=oldblob.lostcount(~featuredeleteidx);
-    %     oldblob.newcount=oldblob.newcount(~featuredeleteidx);
-    %     oldblob.group=oldblob.group(~featuredeleteidx);
+    if(~isempty(oldblob.time))
+        featuredeleteidx=oldblob.time<(frameNum-10);
+        oldblob.feature=oldblob.feature(~featuredeleteidx,:);
+        oldblob.point=oldblob.point(~featuredeleteidx,:);
+        oldblob.status=oldblob.status(~featuredeleteidx);
+        oldblob.lostcount=oldblob.lostcount(~featuredeleteidx);
+        oldblob.newcount=oldblob.newcount(~featuredeleteidx);
+        oldblob.group=oldblob.group(~featuredeleteidx);
+        oldblob.grouptmp=oldblob.grouptmp(~featuredeleteidx);
+        oldblob.time=oldblob.time(~featuredeleteidx);
+    end
     
     figure(1),imshow(mask),title(masklist{frameNum+2});
+    
+    frame=input;
+    groupnum=length(groupinfo.time);
+    for iii=1:groupnum
+        if(groupinfo.time(iii)==frameNum)
+            frame=insertObjectAnnotation(frame,'rectangle',...
+                groupinfo.boundary(iii,:),num2str(groupinfo.group(iii)));
+        end
+    end
+%     
+    figure(3),imshow(frame),title('result of tracking');
 end
     function output_yzbx(blob)
+        str='output_yzbx.................'
         size(blob.feature)
+        size(blob.point)
         size(blob.status)
         size(blob.lostcount)
         size(blob.newcount)
         size(blob.group)
+        size(blob.grouptmp)
+        size(blob.time)
+        %         blob.time
     end
     function frame=getFrame(filepath,filelist,frameNum)
         frame=imread([filepath,'\',filelist{frameNum+2}]);
     end
-    function param=getKalmanParam()
-        param.motionModel           = 'ConstantAcceleration';
-        param.initialLocation       = 'Same as first detection';
-        param.initialEstimateError  = 1E5 * ones(1, 3);
-        param.motionNoise           = [25, 10, 1];
-        param.measurementNoise      = 25;
-        param.segmentationThreshold = 0.05;
-    end
+
+%     function param=getKalmanParam()
+%         param.motionModel           = 'ConstantAcceleration';
+%         param.initialLocation       = 'Same as first detection';
+%         param.initialEstimateError  = 1E5 * ones(1, 3);
+%         param.motionNoise           = [25, 10, 1];
+%         param.measurementNoise      = 25;
+%         param.segmentationThreshold = 0.05;
+%     end
+
     function [area,center,boundary,pixellist]=blobInfo()
         mask=imfill(mask==255,'holes');
         mask=bwareaopen(mask,minarea);
@@ -92,7 +118,7 @@ end
         pixellist=cc.PixelIdxList;
     end
 
-    function [newblob,oldblob,pair,featuredeleteidx]=blobMatchAndUpdate(newblob,oldblob)
+    function [newblob,oldblob,pair,featuredeleteidx]=blobFeatureUpdate(newblob,oldblob)
         if(~blobInit)
             pair=[];
             %             oldblob=newblob;
@@ -111,35 +137,29 @@ end
             featuredeleteidx=false(1,newfeaturenum);
             blobInit=true;
         else
-            
-            
             pair=matchFeatures(newblob.feature,oldblob.feature);
-            newmatch=newblob.point(pair(:,1),:);
-            oldmatch=oldblob.point(pair(:,2),:);
-            figure(2),showMatchedFeatures(newblob.input,oldblob.input,newmatch,...
-                oldmatch,'montage');
-            title(inputlist{frameNum+2});
+            if(~isempty(pair))
+                newmatch=newblob.point(pair(:,1),:);
+                oldmatch=oldblob.point(pair(:,2),:);
+                figure(2),showMatchedFeatures(newblob.input,oldblob.input,newmatch,...
+                    oldmatch,'montage');
+                title(inputlist{frameNum+2});
+            end
             
             newblobnum=length(newblob.area);
-            %             oldblobnum=length(oldblob.area);
-            %             matchmat=zeros(newblobnum,oldblobnum);
             newlocation=floor(newblob.point.Location);
             oldlocation=floor(newblob.point.Location);
-            
-            %             [pairnum,~]=size(pair);
-            %             newblobgroup=false(newblobnum,pairnum);
             [newfeaturenum,~]=size(newblob.feature);
-            %             oldblobpair=false(oldblobnum,pairnum);
             minblobid=blobid;
-            
+            %             set the group information for newblob.
             for i=1:newfeaturenum
                 newind=sub2ind([height,width],newlocation(i,2),oldlocation(i,1));
-                %                 oldind=sub2ind([height,width],oldlocation(i,2),oldlocation(i,1));
                 for j=1:newblobnum
                     %                     if(blob.pixellist
+                    %                         pixellist=newblob.pixellist{j};
+                    
                     if(~isempty(find(newblob.pixellist{j}==newind,1,'first')))
-                        %                         newblobgroup(j,i)=true;
-                        newblob.grouptmp(i)=j+blobid;
+                        newblob.grouptmp(i)=j+minblobid;
                         break;
                     end
                 end
@@ -150,10 +170,16 @@ end
             
             %            update matched feature, add new feature
             for i=1:newfeaturenum
+                if(newblob.grouptmp(i)==0)
+                    continue;
+                end
+                
                 j=find(pair(:,1)==i,1,'first');
                 if(~isempty(j))
                     j=pair(j,2);
                     oldblob.feature(j,:)=newblob.feature(i,:);
+                    oldblob.point(j,:)=newblob.point(i,:);
+                    oldblob.grouptmp(j)=newblob.grouptmp(i);
                     %                     if(strcmp(oldblob.status(j),'normal'))
                     if(oldblob.status(j)==2)
                         oldblob.time(j)=frameNum;
@@ -164,6 +190,9 @@ end
                     if(oldblob.status(j)==3)
                         %                         oldblob.status(j)='normal';
                         oldblob.status(j)=2;
+                        if(oldblob.group(j)==0)
+                            warning('what''the fuck');
+                        end
                         oldblob.time(j)=frameNum;
                         continue;
                     end
@@ -174,12 +203,17 @@ end
                         if(oldblob.newcount(j)>2)
                             %                             oldblob.status(j)='normal';
                             oldblob.status(j)=2;
+                            if(oldblob.group(j)==0)
+                                warning('start debug');
+                            end
                         end
                         oldblob.time(j)=frameNum;
                     end
+                    
+                    oldblob.time(j)=frameNum;
                 else
                     oldblob.feature(end+1,:)=newblob.feature(i,:);
-                    oldblob.point(end+1)=newblob.point(i);
+                    oldblob.point(end+1,:)=newblob.point(i,:);
                     oldblob.status(end+1)=1;
                     oldblob.newcount(end+1)=1;
                     oldblob.lostcount(end+1)=0;
@@ -198,7 +232,7 @@ end
                     if(oldblob.status(i)==2)
                         %                         oldblob.status(i)='lost';
                         oldblob.status(i)=3;
-                        oldblob.time(i)=frameNum;
+                        %                         oldblob.time(i)=frameNum;
                         oldblob.lostcount(i)=1;
                         continue;
                     end
@@ -206,9 +240,10 @@ end
                     if(oldblob.status(i)==3)
                         %                         oldblob.status(i)='lost';
                         oldblob.status(i)=3;
-                        oldblob.time(i)=frameNum;
+                        %                         oldblob.time(i)=frameNum;
                         oldblob.lostcount(i)=oldblob.lostcount(i)+1;
                         if(oldblob.lostcount(i)>3)
+                            oldblob.lostcount(i)=4;
                             featuredeleteidx(i)=true;
                         end
                         continue;
@@ -216,12 +251,13 @@ end
                     %                     if(strcmp(oldblob.status(i),'new'))
                     if(oldblob.status(i)==1)
                         %                         oldblob.status(i)='lost';
-                        oldblob.status(i)=3;
-                        oldblob.time(i)=frameNum;
+                        oldblob.status(i)=4;
+                        %                         oldblob.time(i)=frameNum;
                         featuredeleteidx(i)=true;
                         continue;
                     end
                     
+                    %                     oldblob.time(i)=frameNum;
                 end
             end
             oldblob.input=newblob.input;
@@ -229,45 +265,8 @@ end
         end
     end
 
-    function blobSpeed(oldblob,newblob)
-        num=length(newblob.center);
-        for i=1:num
-            
-        end
-        if ~isTrackInitialized
-            if isObjectDetected
-                % Initialize a track by creating a Kalman filter when the ball is
-                % detected for the first time.
-                initialLocation = detectedLocation;
-                kalmanFilter = configureKalmanFilter(param.motionModel, ...
-                    initialLocation, param.initialEstimateError, ...
-                    param.motionNoise, param.measurementNoise);
-                
-                isTrackInitialized = true;
-                trackedLocation = correct(kalmanFilter, detectedLocation);
-                label = 'Initial';
-            else
-                trackedLocation = [];
-                label = '';
-            end
-            
-        else
-            % Use the Kalman filter to track the ball.
-            if isObjectDetected % The ball was detected.
-                % Reduce the measurement noise by calling predict followed by
-                % correct.
-                predict(kalmanFilter);
-                trackedLocation = correct(kalmanFilter, detectedLocation);
-                label = 'Corrected';
-            else % The ball was missing.
-                % Predict the ball's location.
-                trackedLocation = predict(kalmanFilter);
-                label = 'Predicted';
-            end
-        end
-    end
-
     function [feature,point]=blobFeature()
+        
         gray=rgb2gray(input);
         gray(~mask)=0;
         point=detectSURFFeatures(gray);
@@ -382,25 +381,30 @@ end
     end
 
     function addgroupinfo(boundary,center)
-        groupinfo.center(end+1,:)=center;
-        groupinfo.boundary(end+1,:)=boundary;
+        groupinfo.center(end+1,:)=center.Centroid;
+        groupinfo.boundary(end+1,:)=boundary.BoundingBox;
         groupinfo.group(end+1)=groupid;
+        groupinfo.time(end+1)=frameNum;
         groupid=groupid+1;
-        maxdistmat(end+1,:)=0;
-        maxdistmat(:,end+1)=0;
+        %         maxdistmat(end+1,:)=0;
+        %         maxdistmat(:,end+1)=0;
+        [m,n]=size(maxdistmat);
+        tmp=maxdistmat;
+        maxdistmat=zeros(m+1,n+1);
+        maxdistmat(1:m,1:n)=tmp;
         
         [m,n]=size(maxdistmat);
         
         for i=1:m
             c=groupinfo.center(i,:);
             
-            dif=center-c;
+            dif=center.Centroid-c;
             maxdistmat(i,n)=sum(dif.^2);
             maxdistmat(n,i)=maxdistmat(i,n);
         end
     end
 
-    function oldblob=featureGrounpUpdate(newblob,oldblob,pair)
+    function oldblob=groupMergeAndSplit(newblob,oldblob,pair)
         %         create new group, update group track status, split and merge
         %         group
         [featurenum,~]=size(oldblob.feature);
@@ -420,7 +424,7 @@ end
         % new group, new maxdistmat and groupinfo
         for i=1:featurenum
             %             if(strcmp(oldblob.status(i),'normal')&&oldblob.group(i)==0)
-            if(oldblob.status(i)==2&&oldblob.group(i)==0&&oldblob.grouptmp(i)>minblobid)
+            if(oldblob.group(i)==0&&oldblob.grouptmp(i)>minblobid)
                 id=find(grouptmp2id(:,1)==oldblob.grouptmp(i),1,'first');
                 if(isempty(id))
                     grouptmp2id(end+1,1)=oldblob.grouptmp(i);
@@ -465,9 +469,16 @@ end
             if(newgroupid>0)
                 oldgroupid=oldblob.group(oldfeatureid)-mingroupid+1;
                 %             if(strcmp(oldblob.status(oldfeatureid),'normal'))
-                if(oldblob.status(oldfeatureid)==2)
-                    matchmat(oldgroupid,newgroupid)=matchmat(oldgroupid,newgroupid,1)+1;
+                %                 if(oldblob.status(oldfeatureid)==2)
+                %                     matchmat(oldgroupid,newgroupid)=matchmat(oldgroupid,newgroupid)+1;
+                %                 end
+                if(oldblob.time(oldfeatureid)==frameNum)
+                    matchmat(oldgroupid,newgroupid)=matchmat(oldgroupid,newgroupid)+1;
+                else
+                    error('oldblob.time ........');
                 end
+            else
+                warning('newgroupid <=0 is possible, for old matched feature..........');
             end
         end
         
@@ -477,8 +488,12 @@ end
         [oldfeaturenum,~]=size(oldblob.feature);
         for i=1:oldfeaturenum
             %             if(strcmp(oldblob.status(oldfeatureid),'normal'))
-            if(oldblob.status(i)==2)
+            if(oldblob.time==frameNum)
+                
                 oldgroupid=oldblob.group(i)-mingroupid+1;
+                if(oldgroupid<=0)
+                    warning('what''s the fuck');
+                end
                 trackarray(oldgroupid)=trackarray(oldgroupid)+1;
             end
         end
@@ -505,8 +520,8 @@ end
                             centeridk=find(groupinfo.group==oldgroupidk,1,'first');
                             %                             dif=oldblob.center(idx(j))-oldblob.center(idx(k));
                             %                             threshold=oldblob.boundary(1:2)+oldblob.boundary(1:2)+10;
-                            dif=groupinfo.center(centeridj)-groupinfo.center(centeridk);
-                            threshold=groupinfo.boundary(centeridj)-groupinfo.boundary(centeridk);
+                            dif=groupinfo.center(centeridj,:)-groupinfo.center(centeridk,:);
+                            threshold=groupinfo.boundary(centeridj,:)-groupinfo.boundary(centeridk,:);
                             threshold=threshold(1:2);
                             dif=sum(dif.^2);
                             threshold=sum(threshold.^2);
@@ -549,8 +564,8 @@ end
                             oldgroupidk=idx(k)+mingroupid-1;
                             centeridj=find(groupinfo.group==oldgroupidj,1,'first');
                             centeridk=find(groupinfo.group==oldgroupidk,1,'first');
-                            dif=groupinfo.center(centeridj)-groupinfo.center(centeridk);
-                            threshold=groupinfo.boundary(centeridj)-groupinfo.boundary(centeridk);
+                            dif=groupinfo.center(centeridj,:)-groupinfo.center(centeridk,:);
+                            threshold=groupinfo.boundary(centeridj,:)-groupinfo.boundary(centeridk,:);
                             threshold=threshold(1:2);
                             
                             dif=sum(dif.^2);
@@ -567,13 +582,17 @@ end
         
         [oldblob,validmatchmat]=tracksplit(splitgroup,newblob,oldblob,pair,validmatchmat);
         
-        [oldblob]=normalGroupUpdate(oldblob,newblob,validmatchmat);
+        [oldblob]=featureGroupUpdate(oldblob,newblob,validmatchmat);
+        
+        validgroupidx=sum(validmatchmat,2)>0;
+        groupinfo.time(validgroupidx)=frameNum;
+        
     end
 
-    function [oldblob]=normalGroupUpdate(oldblob,newblob,validmatchmat)
+    function [oldblob]=featureGroupUpdate(oldblob,newblob,validmatchmat)
         oneoldidx=(sum(validmatchmat,1)==1);
         [m,n]=size(validmatchmat);
-        for i=1:m
+        for i=1:n
             if(oneoldidx(i))
                 j=find(validmatchmat(i,:),1,'first');
                 if(sum(validmatchmat(:,j)==1))
@@ -587,15 +606,17 @@ end
         %         update maxdistinfo
         %       only the matched groud update center and boundary.
         offset=find(groupinfo.group==mingroupid,1,'first');
-        [m,n]=size(maxdistmat);
-        for i=offset:m
-            for j=1:n
-                if(j<i)
-                    dif=groupinfo.center(i)-groupinfo.center(j);
-                    dist=sum(dif.^2);
-                    if(maxdistmat(i,j)<dist)
-                        maxdistmat(i,j)=dist;
-                        maxdistmat(j,i)=dist;
+        if(~isempty(offset))
+            [m,n]=size(maxdistmat);
+            for i=offset:m
+                for j=1:n
+                    if(j<i)
+                        dif=groupinfo.center(i)-groupinfo.center(j);
+                        dist=sum(dif.^2);
+                        if(maxdistmat(i,j)<dist)
+                            maxdistmat(i,j)=dist;
+                            maxdistmat(j,i)=dist;
+                        end
                     end
                 end
             end
