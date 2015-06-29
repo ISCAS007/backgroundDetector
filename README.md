@@ -1,5 +1,18 @@
+#tracking 
+2015年6月25日
+track\readme.md
 # background visulization
-2015年6月16日:
+2015年6月18日： 分析系列程序
+1. backgroundLightAnalyse.m 主要针对单个像素点的像素序列，输入.mat文件给_run文件分析
+2. backgroundLightAnalyse2.m
+针对图片中所有的像素点在整个时间域上的最大值，最小值，平均值等等，输出.mat文件给_run文件分析
+3. backgroundLightAnalyse_run.m
+4. backgroundLightAnalyse2_run.m
+5. backgroundLightAnalyse_shadow.m 
+6. dataAnalyze.m 对.mat文件中的rgb,class数据进行分析
+7. changeImgName.m 更改图片的文件名，从而利用BGSlibrary 进行分析
+8. PBASErrorAnalyse.m 对PBAS算法的输出结果进行分析，统计背景出错频率图及前景出错频率图
+2015年6月16日：
 edgeAnalyse.m  :分析边
 LBP.m  : 分析local binary pattern 直方图
 localWave.m : 分析局部像素之间的关系

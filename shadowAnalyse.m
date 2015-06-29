@@ -2,7 +2,8 @@ function shadowAnalyse()
 % analyse the feature of shadow in one picture
 % 求取阴影与背景亮度的关系，阴影颜色与背景颜色的关系
 % 阴影计数大于10,取100到200帧，背景亮度
-root='D:\firefoxDownload\matlab\dataset2012\dataset\shadow\bungalows';
+% root='D:\firefoxDownload\matlab\dataset2012\dataset\shadow\bungalows';
+root='D:\Program\matlab\dataset2012\dataset\shadow\bungalows';
 roi=load([root,'\temporalROI.txt']);
 
 [shadowK,frameNumK]=getshadowK();
@@ -116,6 +117,7 @@ getHistogram(shadowK,frameNumK);
             subplot(234),hist(static),title('static');
             subplot(235),hist(motion),title('motion');
             pause(0.1);
+            save(['shadowAnalyse-',int2str(i)],'shadow','static','motion');
             saveas(h,['shadow-',int2str(i),'-',int2str(a),'-',int2str(b)],'bmp');
             close(h);
 %             display(shadow);

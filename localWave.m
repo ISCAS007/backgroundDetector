@@ -1,7 +1,8 @@
 function localWave()
 % root='D:\firefoxDownload\matlab\dataset2012\dataset\shadow\bungalows';
 % root='D:\firefoxDownload\matlab\dataset2012\dataset\dynamicBackground\fall';
-root='D:\firefoxDownload\matlab\dataset2012\dataset\dynamicBackground\boats';
+% root='D:\firefoxDownload\matlab\dataset2012\dataset\dynamicBackground\boats';
+root='D:\Program\matlab\dataset2012\dataset\dynamicBackground\boats';
 roi=load([root,'\temporalROI.txt']);
 
 motionK=getMotionK();

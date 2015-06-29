@@ -1,30 +1,34 @@
 function backgroundLightAnalyse2()
+% 求整幅图中，像素之间的关系
 % root='D:\firefoxDownload\matlab\dataset2012\dataset\shadow\bungalows';
-root='/media/yzbx/杞欢/firefoxDownload/matlab/dataset2012/dataset/dynamicBackground/fall';
-roi=load([root,'/temporalROI.txt']);
+root='D:\Program\matlab\dataset2012\dataset\dynamicBackground\fall';
+% root='/media/yzbx/杞欢/firefoxDownload/matlab/dataset2012/dataset/dynamicBackground/fall';
+roi=load([root,'\temporalROI.txt']);
 roi(1)=1450;
 
 staticImgRange=[];
 staticImgMean=[];
+staticImgMode=[];
 staticFrameDif=[];
 
 motionImgRange=[];
 motionImgMean=[];
+motionImgMode=[];
 motionFrameDif=[];
 
 spaceAnalyse();
 
 % img=imread([groundTruthPath,'\',filelist{frameNum+2}]);
     function frame=getFrame(filepath,filelist,frameNum)
-        frame=imread([filepath,'/',filelist{frameNum+2}]);
+        frame=imread([filepath,'\',filelist{frameNum+2}]);
     end
 
     function spaceAnalyse()
-        groundTruthPath=[root,'/groundtruth'];
+        groundTruthPath=[root,'\groundtruth'];
         infolist=dir(groundTruthPath);
         groundTruthlist={infolist.name};
         
-        inputPath=[root,'/input'];
+        inputPath=[root,'\input'];
         infolist=dir(inputPath);
         inputlist={infolist.name};
         
@@ -83,10 +87,19 @@ spaceAnalyse();
            
         end
         
+        
+        save(['backgroundLightAnalyse2-1'],'staticMax','staticMin','staticSum',...
+            'staticCount','motionMax','motionMin','motionSum','motionCount',...
+            'staticFrameDif','motionFrameDif');
+        
         staticImgRange=staticMax-staticMin;
         staticImgMean=double(staticSum)./double(staticCount);
+        staticImgMode=mode(staticImgRange);
+        
         motionImgRange=motionMax-motionMin;
         motionImgMean=double(motionSum)./double(motionCount);
+        motionImgMode=mode(motionImgRange);
+        
         
         show(groundTruth,input,K);
     end
@@ -96,7 +109,7 @@ spaceAnalyse();
         subplot(231),imshow(groundTruth),title('groundTruth');
         subplot(232),imshow(input),title('input');
         subplot(233),imshow(imadjust(staticImgRange/max(staticImgRange(:)))),title('staticImgRange');
-        subplot(234),imshow(imadjust(staticImgMean/max(staticImgMean(:)))),title('input');
+        subplot(234),imshow(imadjust(staticImgMean/max(staticImgMean(:)))),title('staticImgMean');
         subplot(235),imshow(imadjust(motionImgRange/max(motionImgRange(:)))),title('motionImgRange');
         subplot(236),imshow(imadjust(motionImgMean/max(motionImgMean(:)))),title('motionImgMean');
         

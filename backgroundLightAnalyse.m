@@ -1,4 +1,5 @@
 function backgroundLightAnalyse()
+% 求单个像素点随时间的变化以及在空间中的分布
 % root='D:\firefoxDownload\matlab\dataset2012\dataset\shadow\bungalows';
 root='D:\Program\matlab\dataset2012\dataset\dynamicBackground\fall';
 roi=load([root,'\temporalROI.txt']);

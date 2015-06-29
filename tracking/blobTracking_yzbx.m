@@ -5,12 +5,14 @@ function multiObjectTracking_yzbx()
 % path='D:\firefoxDownload\matlab\dataset2012\dataset\baseline\PETS2006';
 % path='D:\firefoxDownload\matlab\dataset2012\dataset\dynamicBackground\fall';
 % path='D:\firefoxDownload\matlab\dataset2012\dataset\shadow\backdoor';
-path='D:\firefoxDownload\matlab\dataset2012\dataset\intermittentObjectMotion\sofa';
+% path='D:\firefoxDownload\matlab\dataset2012\dataset\intermittentObjectMotion\sofa';
+path='D:\Program\matlab\bgslibrary_mfc\outputs';
+roiframeNum=[1,360];
 obj = setupSystemObjects();
 
 tracks = initializeTracks(); % create an empty array of tracks
-roiframeNum=load([path,'\temporalROI.txt']);
-roiframeNum=[1,360];
+% roiframeNum=load([path,'\temporalROI.txt']);
+roiframeNum(2)=length(obj.reader);
 nextId = 1; % ID of the next track
 frameNum=0;
 layer=[];
@@ -18,11 +20,15 @@ layer=[];
 h=figure;
 frame=readFrame();
 [a,b,c]=size(frame);
-frameNum=0;
+frameNum=1;
 % detect moving objects, and track them across video frames
 while frameNum+roiframeNum(1)<=roiframeNum(2)
     frame = readFrame();
     [centroids, bboxes, mask] = detectObjects(frame);
+
+    % perform blob analysis to find connected components
+    [~, centroids, bboxes] = obj.blobAnalyser.step(mask);
+        
     predictNewLocationsOfTracks();
     [assignments, unassignedTracks, unassignedDetections] = ...
         detectionToTrackAssignment();
@@ -47,9 +53,9 @@ frameNum
 
         % create a video file reader
 %         obj.reader = vision.VideoFileReader('atrium.avi');
-        pathlist=dir([path,'\input']);
+        pathlist=dir([path,'\foreground']);
         obj.reader={pathlist.name};
-
+        
         % create two video players, one to display the video,
         % and one to display the foreground mask
         obj.videoPlayer = vision.VideoPlayer('Position', [20, 200, 700, 400]);
@@ -93,25 +99,25 @@ frameNum
 %         frame = obj.reader.step();
         k=frameNum+roiframeNum(1)+2;
         frameNum=frameNum+1;
-        frame=imread([path,'\input\',obj.reader{k}]);
+        frame=imread([path,'\foreground\',obj.reader{k}]);
     end
 
 %% Detect Objects
 
     function [centroids, bboxes, mask] = detectObjects(frame)
 
-        if(frameNum==1)
-%           layer=layerInit(frame);
-%           mask=false(a,b);
-            [layer,mask]=mixtureSubstraction(layer,frame);
-        else
-%           [layer,mask]=layerStep(layer,frame);
-            [layer,mask]=mixtureSubstraction(layer,frame);
-        end
+%         if(frameNum==1)
+% %           layer=layerInit(frame);
+% %           mask=false(a,b);
+%             [layer,mask]=mixtureSubstraction(layer,frame);
+%         else
+% %           [layer,mask]=layerStep(layer,frame);
+%             [layer,mask]=mixtureSubstraction(layer,frame);
+%         end
 
         % detect foreground
         % mask = obj.detector.step(frame);
-
+        mask=(frame==255);
         % apply morphological operations to remove noise and fill in holes
         mask = imopen(mask, strel('rectangle', [3,3]));
         mask = imclose(mask, strel('rectangle', [15, 15]));
@@ -302,7 +308,7 @@ frameNum
 
         % display the mask and the frame
         obj.maskPlayer.step(mask);
-        obj.videoPlayer.step(frame);
+%         obj.videoPlayer.step(frame);
     end
 
 %% Summary
