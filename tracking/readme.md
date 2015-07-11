@@ -1,3 +1,10 @@
+# trajectory 
+- keyframe.m: get key frame and save.
+- linecrosspoint.m: get cross point,called by trajectorysimilar.m 
+- trajectorysimilar.m: find similarity relationship between trajectory.
+- trajectorynorm.m: resample points and norm it to [0,1] by [width height].
+- trajectorycross.m: find cross relationship between trajectory.
+
 # track
 
 reference: [Urban tracker](http://blog.csdn.net/u010598445/article/details/46628991)
