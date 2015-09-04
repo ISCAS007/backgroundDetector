@@ -1,10 +1,10 @@
 function trajectoryDig()
-    csvpath='D:\Program\matlab\bgslibrary_mfc\dataset\data.csv';
+    csvpath='D:\Program\matlab\bgslibrary_mfc\dataset\data1.csv';
     sql=csvread(csvpath,1,0);
     
     
 %     imgpath='D:\Program\matlab\bgslibrary_mfc\outputs\foreground\00000009.png';
-    imgpath='readVideo.png';
+    imgpath='readVideo1.png';
     img=imread(imgpath);
     [height,width,~]=size(img);
     normtra=trajectorynorm(sql,width,height);
