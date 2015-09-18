@@ -54,6 +54,7 @@ function [layer,mixtureMask]=mixtureSubstraction(layer,frame)
             'HardModel',zeros(a,b,c,'double'),...
             'distanceMax',ones(a,b,'double')*0.01,...
             'distanceMaxCount',zeros(a,b,'uint32'),...
+            'countMax',20,...
             'foreCount',zeros(a,b,'uint32'),...
             'minArea',round(a*b/1000),...
             'learnRate',0.05,...
@@ -129,8 +130,8 @@ function [layer,mixtureMask]=mixtureSubstraction(layer,frame)
             layer.lightMin=min(layer.lightMin,light);
         end
         
-        maxc=(layer.lightMax>=light-5)&(layer.lightMax<=light);
-        minc=(layer.lightMin>=light)&(layer.lightMin<=light+5);
+        maxc=(layer.lightMax>=light-layer.floatValue)&(layer.lightMax<=light);
+        minc=(layer.lightMin>=light)&(layer.lightMin<=light+layer.floatValue);
         
         
         layer.lightMinCount(minc)=0;
@@ -141,12 +142,12 @@ function [layer,mixtureMask]=mixtureSubstraction(layer,frame)
         
         
         
-        maxv=layer.lightMaxCount>20;
-        minv=layer.lightMinCount>20;
+        maxv=layer.lightMaxCount>layer.countMax;
+        minv=layer.lightMinCount>layer.countMax;
 %         tmpMask=maxv|minv;
         
-        layer.lightMaxCount(maxv)=10;
-        layer.lightMinCount(minv)=10;
+        layer.lightMaxCount(maxv)=ceil(layer.countMax/2);
+        layer.lightMinCount(minv)=ceil(layer.countMax/2);
         layer.lightMax(maxv)=layer.lightMax(maxv)-1;
         layer.lightMin(minv)=layer.lightMin(minv)+1;
        
@@ -158,8 +159,8 @@ function [layer,mixtureMask]=mixtureSubstraction(layer,frame)
         layer.distanceMaxCount(dc)=0;
         layer.distanceMaxCount((~dc)&(~mixtureMask))=layer.distanceMaxCount((~dc)&(~mixtureMask))+1;
         
-        vc=layer.distanceMaxCount>20;
-        layer.distanceMaxCount(vc)=10;
+        vc=layer.distanceMaxCount>layer.countMax;
+        layer.distanceMaxCount(vc)=ceil(layer.countMax/2);
 %         tmpMask=vc;
         
         layer.distanceMax(vc)=layer.distanceMax(vc)*(1-layer.learnRate);
