@@ -6,5 +6,9 @@
 *.fig
 *.ini
 *.log
+*.png
 analyze
 fig
+*~
+*.bmp
+html

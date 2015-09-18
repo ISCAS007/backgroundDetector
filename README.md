@@ -1,4 +1,30 @@
+#CDNet
+2015年6月29日
+
+#tracking 
+2015年6月25日
+track\readme.md
+# background visulization
+2015年6月18日： 分析系列程序
+1. backgroundLightAnalyse.m 主要针对单个像素点的像素序列，输入.mat文件给_run文件分析
+2. backgroundLightAnalyse2.m
+针对图片中所有的像素点在整个时间域上的最大值，最小值，平均值等等，输出.mat文件给_run文件分析
+3. backgroundLightAnalyse_run.m
+4. backgroundLightAnalyse2_run.m
+5. backgroundLightAnalyse_shadow.m 
+6. dataAnalyze.m 对.mat文件中的rgb,class数据进行分析
+7. changeImgName.m 更改图片的文件名，从而利用BGSlibrary 进行分析
+8. PBASErrorAnalyse.m 对PBAS算法的输出结果进行分析，统计背景出错频率图及前景出错频率图
+2015年6月16日：
+edgeAnalyse.m  :分析边
+LBP.m  : 分析local binary pattern 直方图
+localWave.m : 分析局部像素之间的关系
+PBAS.m：分析PBAS算法的背景模型s
+shadowAnalyse.m：分析阴影的直方图s
+
+
 # backgroundDetector
+
 background substraction
 
 1. color segmentation
@@ -34,5 +60,9 @@ background substraction
 3. 中期不成熟的函数
 	vectorLayerMask_yzbx: 求向量差mask,但归一化是利用(1,b/r,g/r)
 	vectorFrameDiffer_yzbx:	综合上下界及向量差，归一化利用(1,b/r,g/r)
+
+# 相关工作
+在github 上搜索关键词 background subtraction, foreground detection 等
+其中最著名的一个是bgslibrary
 	
 	
