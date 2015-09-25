@@ -5,8 +5,9 @@
 % layerAlgrithm([inputpath,'\',filename],['analyze\',outputpath,'.mat']);
 function difModel_run()
 % root='D:\firefoxDownload\matlab\dataset2012\dataset';
-root='D:\Program\matlab\dataset2012\dataset';
-outroot='D:\Program\matlab\dataset2012\results';
+% root='D:\Program\matlab\dataset2012\dataset';
+root='D:\firefoxDownload\matlab\dataset2012\dataset';
+outroot='D:\firefoxDownload\matlab\dataset2012\results-bgs';
 % layernum=3;
 pathlist1=dir(root);
 filenum1=length(pathlist1);
@@ -20,7 +21,7 @@ for i=3:filenum1
     pathlist2=dir([root,'\',filenamelist1{i}]);
     filenum2=length(pathlist2);
     filenamelist2={pathlist2.name};
-    for j=3:filenum2
+    for j=4:filenum2
         path=[root,'\',filenamelist1{i},'\',filenamelist2{j}];
         input=[];
         gtruth=[];
@@ -36,7 +37,7 @@ for i=3:filenum1
         for frameNum=roi(1)-50:roi(2)
            readFrame();
            [layer,mask]=difModel(layer,input);
-           imwrite(mask,[outpath, 'bin', num2str(frameNum, '%.6d'),'.png'],'png');
+           imwrite(mask,[outpath, 'mask', num2str(frameNum, '%.6d'),'.png'],'png');
 %            ooo=[outpath, 'bin', num2str(frameNum, '%.6d')]
            showFrame();
         end
@@ -46,7 +47,7 @@ for i=3:filenum1
 %         close(hmask);
 %         break;
     end
-%         break;
+        break;
 end
 
     function readFrame()

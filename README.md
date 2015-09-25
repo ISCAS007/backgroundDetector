@@ -1,6 +1,10 @@
 #CDNet
 2015年6月29日
 
+- unknown=find(class(3,3,1,:)==170);
+- motion=find(class(3,3,1,:)==255);
+- shadow=find(class(3,3,1,:)==50);
+- static=find(class(3,3,1,:)==0);
 #tracking 
 2015年6月25日
 track\readme.md
