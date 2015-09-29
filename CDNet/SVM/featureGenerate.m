@@ -34,17 +34,25 @@ currentNum=2;
 historyInputs=zeros([height,width,3,historyNum]);
 historyMasks=zeros([height,width,historyNum]);
 
-input=getImg(inputPath,'in',temporalROI(1)-2,'.jpg');
-if(size(input,3)==1)
-    warning('need to change gray img to rgb img');
-    error('debug ...');
+str=num2str(temporalROI(1)-2,'%.6d');
+if(exist([bgsFGDir,'bin',str,'.png'],'file')==0)
+    warning('set first two img as zero');
+else
+    input=getImg(inputPath,'in',temporalROI(1)-2,'.jpg');
+    if(size(input,3)==1)
+        warning('need to change gray img to rgb img');
+        error('debug ...');
+    end
+    
+    historyInputs(:,:,:,1)=input;
+    historyInputs(:,:,:,2)=getImg(inputPath,'in',temporalROI(1)-1,'.jpg');
+    
+    historyMasks(:,:,1)=getImg(bgsFGDir,'bin',temporalROI(1)-2,'.png');
+    historyMasks(:,:,2)=getImg(bgsFGDir,'bin',temporalROI(1)-1,'.png');
 end
 
-historyInputs(:,:,:,1)=input;
-historyInputs(:,:,:,2)=getImg(inputPath,'in',temporalROI(1)-1,'.jpg');
 
-historyMasks(:,:,1)=getImg(bgsFGDir,'mask',temporalROI(1)-2,'.png');
-historyMasks(:,:,2)=getImg(bgsFGDir,'mask',temporalROI(1)-1,'.png');
+
 for i=temporalROI(1):temporalROI(2)
     if(currentNum==historyNum)
         currentNum=1;
@@ -53,7 +61,7 @@ for i=temporalROI(1):temporalROI(2)
     end
     
     historyInputs(:,:,:,currentNum)=getImg(inputPath,'in',i,'.jpg');
-    historyMasks(:,:,currentNum)=getImg(bgsFGDir,'mask',i,'.png');
+    historyMasks(:,:,currentNum)=getImg(bgsFGDir,'bin',i,'.png');
     
     feature=getFeature(historyInputs,historyMasks,currentNum);
     gtImg=getImg(fgPath,'gt',i,'.png');
@@ -61,11 +69,12 @@ for i=temporalROI(1):temporalROI(2)
     
     featureFileName=num2str(i,'%.6d');
     save([featureDir,'\',featureFileName,'.mat'],'feature','label');
+    fprintf('frame num is %s\n',featureFileName);
     clear feature label;
 end
 
 
-%% function 
+%% function
     function img=getImg(baseDir,prefix,frameNum,suffix)
         str=num2str(frameNum,'%.6d');
         img=imread([baseDir,prefix,str,suffix]);
@@ -84,7 +93,7 @@ end
         t=length(thresholds);
         inputSimility=zeros(aa*bb,w*t);
         count=0;
-
+        
         for jj=1:w
             dw=floor(windowSize(jj)/2);
             idx=ceil(windowSize(jj)^2/2);
@@ -112,12 +121,12 @@ end
             dw=floor(windowSize(jj)/2);
             img=false(aa+2*dw,bb+2*dw);
             img(dw+1:dw+aa,dw+1:dw+bb)=currentMask;
-
+            
             neighbor=im2col(img,[windowSize(jj),windowSize(jj)],'sliding');
             
             maskSimility(:,jj)=sum(neighbor);
         end
-       
+        
         %inputs,masks,neighbour
         feature=[inputs,masks,inputSimility,maskSimility];
     end
