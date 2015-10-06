@@ -1,11 +1,12 @@
 featureRootDir='D:\firefoxDownload\matlab\dataset2012\PBAS_23\features-svm';
-CDNetDir='D:\firefoxDownload\matlab\dataset2012\dataset\baseline\highway';
+% CDNetDir='D:\firefoxDownload\matlab\dataset2012\dataset\baseline\highway';
+CDNetDir='D:\firefoxDownload\matlab\dataset2012\dataset\intermittentObjectMotion\abandonedBox';
 svmLearn(CDNetDir,featureRootDir);
 
 
-featureRootDir='D:\firefoxDownload\matlab\dataset2012\SOBS_2_26\features-svm';
-CDNetDir='D:\firefoxDownload\matlab\dataset2012\dataset\baseline\highway';
-svmLearn(CDNetDir,featureRootDir);
+% featureRootDir='D:\firefoxDownload\matlab\dataset2012\SOBS_2_26\features-svm';
+% CDNetDir='D:\firefoxDownload\matlab\dataset2012\dataset\baseline\highway';
+% svmLearn(CDNetDir,featureRootDir);
 
 error('if we have to train');
 

@@ -27,7 +27,7 @@ temporalROI=load(temporalROIFilename);
 % frameNum=1;
 % fileName = num2str(frameNum, '%.6d');
 
-[height,width]=size(roiImg);
+[height,width,~]=size(roiImg);
 
 historyNum=3;
 currentNum=2;

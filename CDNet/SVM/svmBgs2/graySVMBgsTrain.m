@@ -1,3 +1,89 @@
+function svmModel=graySVMBgsTrain(CDNetDir,featureRootDir)
+%     featureGenerate(CDNetDir,featureRootDir);
+svmModel=svmLearn(CDNetDir,featureRootDir);
+end
+
+function featureGenerate(CDNetDir,featureRootDir)
+% use CDNet image dataset to generate svm features
+% CDNetDir: the dir for CDNet dataset, eg: D:\firefoxDownload\matlab\dataset2012\dataset\baseline\highway
+% bgsFGDir: the dir for the foreground(FG) output of background
+% substraction algrithm(bgs)
+% featureDir: the dir to store feature, eg:
+
+result=strfind(CDNetDir,'\');
+datasetName=CDNetDir(result(end-1)+1:end);
+% bgsFGDir=[bgsFGRootDir,'\',datasetName,'\'];
+
+featureDir=[featureRootDir,'\',datasetName,'\'];
+
+mkdir(featureDir);
+
+datasetName=strrep(datasetName,'\','-');
+datasetName=[datasetName,'.mat'];
+
+inputPath=[CDNetDir,'\input\'];
+fgPath=[CDNetDir,'\groundtruth\'];
+bgsFGDir=fgPath;
+% inputFilename='in000001.jpg';
+% groundTruthFilename='gt000001.png';
+roiFilename=[CDNetDir,'\ROI.bmp'];
+roiImg=imread(roiFilename);
+
+temporalROIFilename=[CDNetDir,'\temporalROI.txt'];
+temporalROI=load(temporalROIFilename);
+% frameNum=1;
+% fileName = num2str(frameNum, '%.6d');
+
+[height,width,~]=size(roiImg);
+
+historyNum=20;
+currentNum=0;
+historyInputs=zeros([height,width,1,historyNum],'uint8');
+historyMasks=zeros([height,width,historyNum]);
+
+for i=temporalROI(1):temporalROI(1)+historyNum-1
+    currentNum=currentNum+1;
+    historyInputs(:,:,:,currentNum)=rgb2gray(getImg(inputPath,'in',i,'.jpg'));
+    historyMasks(:,:,currentNum)=getImg(bgsFGDir,'gt',i,'.png');
+end
+
+[aa,bb,cc,dd]=size(historyInputs);
+for i=temporalROI(1)+historyNum:temporalROI(2)
+    if(currentNum==historyNum)
+        currentNum=1;
+    else
+        currentNum=currentNum+1;
+    end
+    
+    historyInputs(:,:,:,currentNum)=rgb2gray(getImg(inputPath,'in',i,'.jpg'));
+    historyMasks(:,:,currentNum)=getImg(bgsFGDir,'gt',i,'.png');
+    
+    %     feature=getFeature(historyInputs,historyMasks,currentNum);
+    if(currentNum<historyNum)
+        idx=[currentNum+1:historyNum,1:currentNum];
+        feature=reshape(historyInputs(:,:,1,idx),aa*bb,historyNum);
+    else
+        feature=reshape(historyInputs,aa*bb,historyNum);
+    end
+    
+    
+    gtImg=getImg(fgPath,'gt',i,'.png');
+    label=reshape(gtImg,[height*width,1]);
+    
+    featureFileName=num2str(i,'%.6d');
+    save([featureDir,'\',featureFileName,'.mat'],'feature','label');
+    fprintf('frame num is %s\n',featureFileName);
+    clear feature label;
+end
+
+
+%% function
+    function img=getImg(baseDir,prefix,frameNum,suffix)
+        str=num2str(frameNum,'%.6d');
+        img=imread([baseDir,prefix,str,suffix]);
+    end
+end
+
 function svmModel=svmLearn(CDNetDir,featureRootDir)
 % single video learn, background:forground=8000:2000
 
@@ -19,20 +105,25 @@ roiImg=imread(roiFilename);
 
 temporalROIFilename=[CDNetDir,'\temporalROI.txt'];
 temporalROI=load(temporalROIFilename);
+temporalROI(1)=temporalROI(1)+20;
+temporalROI(2)=2000;
+
 % frameNum=1;
 % fileName = num2str(frameNum, '%.6d');
 
 [height,width]=size(roiImg);
 
-[feature,label]=getTrainData();
-
+% [feature,label]=getTrainData();
 % save(datasetName,'feature','label');
-posLabelIdx=(label>=170);
-label(posLabelIdx)=1;
-label(~posLabelIdx)=0;
 
-svmModel=train(feature,label);
-save(datasetName,'feature','label','svmModel');
+% load(datasetName,'feature','label');
+% posLabelIdx=(label>=170);
+% label(posLabelIdx)=1;
+% label(~posLabelIdx)=0;
+
+% svmModel=train(feature,label);
+% save(datasetName,'feature','label','svmModel');
+load(datasetName,'svmModel');
 
 evaluate(svmModel);
 
@@ -86,7 +177,7 @@ evaluate(svmModel);
                 end
             end
             
-%             fprintf('i is %d posCount is %d negCount is %d\n',i,posCount,negCount);
+            %             fprintf('i is %d posCount is %d negCount is %d\n',i,posCount,negCount);
         end
         
         
@@ -95,10 +186,12 @@ evaluate(svmModel);
 
     function svmModel=train(feature,label)
         %         label=uint(label);
+        % First argument must be single or double.
+        feature=double(feature);
         [trainIdx, testIdx] = crossvalind('HoldOut',label, 1/2); % split the train and test labels 50%-50%
         idx=trainIdx;
         svmModel = svmtrain(feature(idx,:), label(idx), ...
-            'BoxConstraint', Inf, 'Kernel_Function', 'rbf');
+            'Kernel_Function', 'rbf');
         
         predTest = svmclassify(svmModel, feature(testIdx,:)); % matlab native svm function
         
@@ -127,25 +220,25 @@ evaluate(svmModel);
         FNSum=0;
         for i=temporalROI(1):temporalROI(2)
             numstr=num2str(i,'%.6d');
-            data=load([featureDir,numstr,'.mat']);
+            load([featureDir,numstr,'.mat'],'feature','label');
             %             out of memory
             %             predict=svmclassify(svmModel,data.feature);
             
             
-            featureNum=size(data.feature,1);
+            featureNum=size(feature,1);
             predict=zeros(featureNum,1);
-            gap=20000;
+            gap=5000;
             for j=1:gap:featureNum
                 if(j+gap-1<=featureNum)
-                    predict(j:j+gap-1)=svmclassify(svmModel,data.feature(j:j+gap-1,:));
+                    predict(j:j+gap-1)=svmclassify(svmModel,double(feature(j:j+gap-1,:)));
                 else
-                    predict(j:featureNum)=svmclassify(svmModel,data.feature(j:featureNum,:));
+                    predict(j:featureNum)=svmclassify(svmModel,double(feature(j:featureNum,:)));
                 end
             end
             
-            outROIIdx=data.label==85;
+            outROIIdx=label==85;
             predict=predict(~outROIIdx);
-            label=data.label(~outROIIdx);
+            label=label(~outROIIdx);
             
             label(label<=50)=0;
             label(label>=170)=1;
@@ -171,11 +264,11 @@ evaluate(svmModel);
             end
             FMeasure(j)=2*precision(j)*recall(j)/(precision(j)+recall(j));
             
-%             fprintf('i is %d\n ..................................',i);
-%             fprintf('SVM :\n TP=%d \n TN=%d \n FP=%d \n FN=%d \n',...
-%                 TP,TN,FP,FN);
-%             fprintf('SVM :\naccuracy = %.2f%%\n recall=%.2f%%\n FMeasure=%.2f%%\n', ...
-%                 100*precision(j),100*recall(j),100*FMeasure(j));
+            fprintf('i is %d\n ..................................',i);
+            fprintf('SVM :\n TP=%d \n TN=%d \n FP=%d \n FN=%d \n',...
+                TP,TN,FP,FN);
+            fprintf('SVM :\naccuracy = %.2f%%\n recall=%.2f%%\n FMeasure=%.2f%%\n', ...
+                100*precision(j),100*recall(j),100*FMeasure(j));
         end
         
         PSum=(TPSum+TNSum)/(TPSum+TNSum+FPSum+FNSum);
@@ -183,16 +276,16 @@ evaluate(svmModel);
         FSum=2*PSum*RSum/(PSum+RSum);
         save([featureDir,'\svmLearn.mat'],'precision','recall','FMeasure','PSum','RSum','FSum');
         
-%         fprintf('\n end................................................ \n');
-%         fprintf('P=%f \n R=%f \n F=%f \n',PSum,RSum,FSum);
-%         
-%         fprintf(['max(precision)=%f \n max(recall)=%f \n',...
-%             'max(FMeasure)=%f \n'],max(precision),max(recall),max(FMeasure));
-%         
-%         fprintf(['min(precision)=%f \n min(recall)=%f \n',...
-%             'min(FMeasure)=%f \n'],min(precision),min(recall),min(FMeasure));
-%         
-%         fprintf(['mean(precision)=%f \n mean(recall)=%f \n',...
-%             'mean(FMeasure)=%f \n'],mean(precision),mean(recall),mean(FMeasure));
+        fprintf('\n end................................................ \n');
+        fprintf('P=%f \n R=%f \n F=%f \n',PSum,RSum,FSum);
+        
+        fprintf(['max(precision)=%f \n max(recall)=%f \n',...
+            'max(FMeasure)=%f \n'],max(precision),max(recall),max(FMeasure));
+        
+        fprintf(['min(precision)=%f \n min(recall)=%f \n',...
+            'min(FMeasure)=%f \n'],min(precision),min(recall),min(FMeasure));
+        
+        fprintf(['mean(precision)=%f \n mean(recall)=%f \n',...
+            'mean(FMeasure)=%f \n'],mean(precision),mean(recall),mean(FMeasure));
     end
 end

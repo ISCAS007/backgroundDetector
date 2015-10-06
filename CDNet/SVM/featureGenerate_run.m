@@ -27,11 +27,11 @@ bgsFGRootDir='D:\firefoxDownload\matlab\dataset2012\PBAS_23\results';
 featureRootDir='D:\firefoxDownload\matlab\dataset2012\PBAS_23\features-svm';
 dataset2012(bgsFGRootDir,featureRootDir);
 
-error('exist');
+% error('exist');
 
 %%
-bgsFGRootDir='D:\firefoxDownload\matlab\dataset2012\SOBS_2_26\results';
-featureRootDir='D:\firefoxDownload\matlab\dataset2012\SOBS_2_26\features-svm';
-dataset2012(bgsFGRootDir,featureRootDir);
+% bgsFGRootDir='D:\firefoxDownload\matlab\dataset2012\SOBS_2_26\results';
+% featureRootDir='D:\firefoxDownload\matlab\dataset2012\SOBS_2_26\features-svm';
+% dataset2012(bgsFGRootDir,featureRootDir);
 
 
