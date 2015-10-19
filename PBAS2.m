@@ -1,9 +1,8 @@
-function PBAS()
+function PBAS2()
 % root='D:\firefoxDownload\matlab\dataset2012\dataset\shadow\bungalows';
-root='D:\firefoxDownload\matlab\dataset2012\dataset\dynamicBackground\boats';
+root='D:\firefoxDownload\matlab\dataset2012\dataset\dynamicBackground\fall';
 roi=load([root,'\temporalROI.txt']);
 
-roi=[6900,7400];
 motionK=getMotionK();
 h=figure;
 imshow(motionK);
@@ -70,7 +69,7 @@ show(motionK);
         groundTruth=getFrame(groundTruthPath,filelist,frameNum);
         [a,b]=size(groundTruth);
         motionCount=zeros(a,b,'uint8');
-        K=30;
+        K=50;
         while frameNum<=roi(2)
            groundTruth=getFrame(groundTruthPath,filelist,frameNum);
            if(isa(groundTruth,'uint8'))

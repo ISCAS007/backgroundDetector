@@ -25,7 +25,7 @@ fn=zeros(height,width);
 %     fg=[1480,1500];
 % end
 % fg=[1480,1500];
-fg=[1465,1500];
+fg=[6900,7100];
 roi=load([root,'\temporalROI.txt']);
 figure;
 for frameNum=fg(1):fg(2)
