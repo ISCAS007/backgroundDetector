@@ -1,0 +1,473 @@
+# Created by Octave 3.6.4, Fri Nov 27 10:14:35 2015 中国标准时间 <unknown@PC--20140424WEG>
+# name: a
+# type: matrix
+# rows: 1
+# columns: 100
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100
+
+
+# name: ans
+# type: sq_string
+# elements: 1
+# length: 27
+E:\yzbx_programe\matlab\gmm
+
+
+# name: b
+# type: matrix
+# rows: 1
+# columns: 100
+ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100
+
+
+# name: dirlist
+# type: cell
+# rows: 1
+# columns: 6
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 9
+Utilities
+
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 3
+DDG
+
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 5
+DDGOX
+
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 4
+DDGt
+
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 6
+QDDGOX
+
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 9
+data/CMOS
+
+
+
+
+
+# name: ii
+# type: scalar
+6
+
+
+# name: xrl
+# type: scalar struct
+# ndims: 2
+ 1 1
+# length: 77
+# name: K_SHELL
+# type: scalar
+0
+
+
+# name: L1_SHELL
+# type: scalar
+1
+
+
+# name: L2_SHELL
+# type: scalar
+2
+
+
+# name: L3_SHELL
+# type: scalar
+3
+
+
+# name: M1_SHELL
+# type: scalar
+4
+
+
+# name: M2_SHELL
+# type: scalar
+5
+
+
+# name: M3_SHELL
+# type: scalar
+6
+
+
+# name: M4_SHELL
+# type: scalar
+7
+
+
+# name: M5_SHELL
+# type: scalar
+8
+
+
+# name: N1_SHELL
+# type: scalar
+9
+
+
+# name: N2_SHELL
+# type: scalar
+10
+
+
+# name: N3_SHELL
+# type: scalar
+11
+
+
+# name: N4_SHELL
+# type: scalar
+12
+
+
+# name: N5_SHELL
+# type: scalar
+13
+
+
+# name: N6_SHELL
+# type: scalar
+14
+
+
+# name: N7_SHELL
+# type: scalar
+15
+
+
+# name: O1_SHELL
+# type: scalar
+16
+
+
+# name: O2_SHELL
+# type: scalar
+17
+
+
+# name: O3_SHELL
+# type: scalar
+18
+
+
+# name: O4_SHELL
+# type: scalar
+19
+
+
+# name: O5_SHELL
+# type: scalar
+20
+
+
+# name: O6_SHELL
+# type: scalar
+21
+
+
+# name: O7_SHELL
+# type: scalar
+22
+
+
+# name: P1_SHELL
+# type: scalar
+23
+
+
+# name: P2_SHELL
+# type: scalar
+24
+
+
+# name: P3_SHELL
+# type: scalar
+25
+
+
+# name: P4_SHELL
+# type: scalar
+26
+
+
+# name: P5_SHELL
+# type: scalar
+27
+
+
+# name: KL1_LINE
+# type: scalar
+-1
+
+
+# name: KL2_LINE
+# type: scalar
+-2
+
+
+# name: KL3_LINE
+# type: scalar
+-3
+
+
+# name: KM1_LINE
+# type: scalar
+-4
+
+
+# name: KM2_LINE
+# type: scalar
+-5
+
+
+# name: KM3_LINE
+# type: scalar
+-6
+
+
+# name: KM4_LINE
+# type: scalar
+-7
+
+
+# name: KM5_LINE
+# type: scalar
+-8
+
+
+# name: KN1_LINE
+# type: scalar
+-9
+
+
+# name: KN2_LINE
+# type: scalar
+-10
+
+
+# name: KN3_LINE
+# type: scalar
+-11
+
+
+# name: KN4_LINE
+# type: scalar
+-12
+
+
+# name: KN5_LINE
+# type: scalar
+-13
+
+
+# name: L1M1_LINE
+# type: scalar
+-14
+
+
+# name: L1M2_LINE
+# type: scalar
+-15
+
+
+# name: L1M3_LINE
+# type: scalar
+-16
+
+
+# name: L1M4_LINE
+# type: scalar
+-17
+
+
+# name: L1M5_LINE
+# type: scalar
+-18
+
+
+# name: L1N1_LINE
+# type: scalar
+-19
+
+
+# name: L1N2_LINE
+# type: scalar
+-20
+
+
+# name: L1N3_LINE
+# type: scalar
+-21
+
+
+# name: L1N4_LINE
+# type: scalar
+-22
+
+
+# name: L1N5_LINE
+# type: scalar
+-23
+
+
+# name: L1N6_LINE
+# type: scalar
+-24
+
+
+# name: L1N7_LINE
+# type: scalar
+-25
+
+
+# name: L2M1_LINE
+# type: scalar
+-26
+
+
+# name: L2M2_LINE
+# type: scalar
+-27
+
+
+# name: L2M3_LINE
+# type: scalar
+-28
+
+
+# name: L2M4_LINE
+# type: scalar
+-29
+
+
+# name: L2M5_LINE
+# type: scalar
+-30
+
+
+# name: L2N1_LINE
+# type: scalar
+-31
+
+
+# name: L2N2_LINE
+# type: scalar
+-32
+
+
+# name: L2N3_LINE
+# type: scalar
+-33
+
+
+# name: L2N4_LINE
+# type: scalar
+-34
+
+
+# name: L2N5_LINE
+# type: scalar
+-35
+
+
+# name: L2N6_LINE
+# type: scalar
+-36
+
+
+# name: L2N7_LINE
+# type: scalar
+-37
+
+
+# name: L3M1_LINE
+# type: scalar
+-38
+
+
+# name: L3M2_LINE
+# type: scalar
+-39
+
+
+# name: L3M3_LINE
+# type: scalar
+-40
+
+
+# name: L3M4_LINE
+# type: scalar
+-41
+
+
+# name: L3M5_LINE
+# type: scalar
+-42
+
+
+# name: L3N1_LINE
+# type: scalar
+-43
+
+
+# name: L3N2_LINE
+# type: scalar
+-44
+
+
+# name: L3N3_LINE
+# type: scalar
+-45
+
+
+# name: L3N4_LINE
+# type: scalar
+-46
+
+
+# name: L3N5_LINE
+# type: scalar
+-47
+
+
+# name: L3N6_LINE
+# type: scalar
+-48
+
+
+# name: L3N7_LINE
+# type: scalar
+-49
+
+
+
+

@@ -1,12 +1,15 @@
 function PBAS2()
 % root='D:\firefoxDownload\matlab\dataset2012\dataset\shadow\bungalows';
-root='D:\firefoxDownload\matlab\dataset2012\dataset\dynamicBackground\fall';
+% root='D:\firefoxDownload\matlab\dataset2012\dataset\dynamicBackground\fall';
+root='D:\firefoxDownload\matlab\dataset2012\dataset\dynamicBackground\boats';
 roi=load([root,'\temporalROI.txt']);
-
+roi=[6900,7100];
 motionK=getMotionK();
+close all;
 h=figure;
 imshow(motionK);
 saveas(h,'PBAS','bmp');
+save('motionK.mat','motionK');
 close(h);
 show(motionK);
 
@@ -69,7 +72,7 @@ show(motionK);
         groundTruth=getFrame(groundTruthPath,filelist,frameNum);
         [a,b]=size(groundTruth);
         motionCount=zeros(a,b,'uint8');
-        K=50;
+        K=30;
         while frameNum<=roi(2)
            groundTruth=getFrame(groundTruthPath,filelist,frameNum);
            if(isa(groundTruth,'uint8'))
@@ -112,6 +115,7 @@ show(motionK);
             label=[];
             motion=[];
             static=[];
+            gradient=[];
             getSample=false;
 %             for j=1:frameNumK
             while frameNum<=roi(2)
@@ -130,8 +134,11 @@ show(motionK);
                 gray=rgb2gray(input);
                 info=double(gray(a,b));
                 
+                [Gx,Gy]= imgradientxy(gray);
+                gradient(end+1,1:2)=[Gx(a,b),Gy(a,b)];
+                
                 ground(end+1)=info;
-                label(end+1)=0;
+                label(end+1)=groundTruth(pos);
 %                 display(info);
                 if(groundTruth(pos)==50)
 %                     shadow(end+1)=sqrt(sum(info.^2));
@@ -157,14 +164,18 @@ show(motionK);
             
             a,b
             h=figure;
-            subplot(221),imshow(lableImg(groundTruthSample,a,b)),title('groundTruth');
+%             subplot(221),imshow(lableImg(groundTruthSample,a,b)),title('groundTruth');
+            staticGradient=gradient(label<=50,1:2);
+            movingGradietn=gradient(label>=170,1:2);
+            subplot(221),scatter(staticGradient(:,1),staticGradient(:,2),3,'blue');
+            hold on,scatter(movingGradietn(:,1),movingGradietn(:,2),3,'red'),title('gradient');
             subplot(222),imshow(lableImg(inputSample,a,b)),title('input');
 %             subplot(233),hist(log(shadow)/log(3)),title('shadow');
 %             subplot(223),hist(log(static)/log(3)),title('static');
 %             subplot(224),hist(log(motion)/log(3)),title('motion');
             PBAS_Show(ground,label);
             pause(0.1);
-            saveas(h,['PBAS-',int2str(i),'-',int2str(a),'-',int2str(b)],'bmp');
+            saveas(h,['PBAS2-',int2str(i),'-',int2str(a),'-',int2str(b)],'bmp');
             close(h);
 %             display(shadow);
 %             display(background);
