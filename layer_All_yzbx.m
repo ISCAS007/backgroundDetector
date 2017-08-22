@@ -236,7 +236,7 @@ else
             dif=rgb(:,:,:,2)-rgb(:,:,:,1);
             dif=sum(dif.^2,3);
             dif=dif(:);
-%             foregroundratio,µÚÒ»Ö¡ÖĞÇ°¾°µÄ±ÈÀı¡£
+%             foregroundratio,ç¬¬ä¸€å¸§ä¸­å‰æ™¯çš„æ¯”ä¾‹ã€‚
             threshold=prctile(dif,1-foregroundratio);
             idx=dif>threshold;
             mask=idx;
@@ -290,40 +290,40 @@ mask=dif>layer.vecgap;
 
 function layer=update(layer,frame)
     layer=layerUpdate_yzbx(layer,frame);
-% % pmaxidx ´óÓÚ±³¾°ÏñËØÉÏ½çµÄË÷Òı
-% % pminidx Ğ¡ÓÚ±³¾°ÏñËØÏÂ½çµÄË÷Òı
+% % pmaxidx å¤§äºèƒŒæ™¯åƒç´ ä¸Šç•Œçš„ç´¢å¼•
+% % pminidx å°äºèƒŒæ™¯åƒç´ ä¸‹ç•Œçš„ç´¢å¼•
 % pmaxidx=rgbi(:,:,1)>layer.pmaxSetMean(:,:,1);
 % pminidx=rgbi(:,:,1)<layer.pminSetMean(:,:,1);
 % 
-% % midminidx ±³¾°ÏñËØ·¶Î§ÖĞ£¬Ó¦·ÖÅäµ½¡®ÏÂ½ç¼¯ºÏ¡¯µÄË÷Òı
-% % midmaxidx ±³¾°ÏñËØ·¶Î§ÖĞ£¬Ó¦·ÖÅäµ½¡®ÉÏ½ç¼¯ºÏ¡¯µÄË÷Òı
+% % midminidx èƒŒæ™¯åƒç´ èŒƒå›´ä¸­ï¼Œåº”åˆ†é…åˆ°â€˜ä¸‹ç•Œé›†åˆâ€™çš„ç´¢å¼•
+% % midmaxidx èƒŒæ™¯åƒç´ èŒƒå›´ä¸­ï¼Œåº”åˆ†é…åˆ°â€˜ä¸Šç•Œé›†åˆâ€™çš„ç´¢å¼•
 % idx=layer.pminnum<layer.pmaxnum;
 % midminidx=idx&(~pmaxidx)&(~pminidx);
 % midmaxidx=(~idx)&(~pmaxidx)&(~pminidx);
 % 
-% % pmaxidx 0-255µÄÏñËØ·¶Î§ÄÚ£¬Ó¦·ÖÅäµ½¡®ÉÏ½ç¼¯ºÏ¡¯µÄË÷Òı
-% % pminidx 0-255µÄÏñËØ·¶Î§ÄÚ£¬Ó¦·ÖÅäµ½¡®ÏÂ½ç¼¯ºÏ¡¯µÄË÷Òı
+% % pmaxidx 0-255çš„åƒç´ èŒƒå›´å†…ï¼Œåº”åˆ†é…åˆ°â€˜ä¸Šç•Œé›†åˆâ€™çš„ç´¢å¼•
+% % pminidx 0-255çš„åƒç´ èŒƒå›´å†…ï¼Œåº”åˆ†é…åˆ°â€˜ä¸‹ç•Œé›†åˆâ€™çš„ç´¢å¼•
 % pmaxidx=pmaxidx|midmaxidx;
 % pminidx=pminidx|midminidx;
 
-% Ò»¸öÏñËØ£¬ÒªÃ´·ÖÅäµ½¡®ÉÏ½ç¼¯ºÏ¡¯£¬ÒªÃ´·ÖÅäµ½¡®ÏÂ½ç¼¯ºÏ¡¯¡£
+% ä¸€ä¸ªåƒç´ ï¼Œè¦ä¹ˆåˆ†é…åˆ°â€˜ä¸Šç•Œé›†åˆâ€™ï¼Œè¦ä¹ˆåˆ†é…åˆ°â€˜ä¸‹ç•Œé›†åˆâ€™ã€‚
 % andsum=sum(sum(pmaxidx&pminidx));
 % orsum=sum(sum(pmaxidx|pminidx));
 % if(andsum~=0||orsum~=a*b)
 %    disp('error andsum,orsum in datafit'); 
 % end
 
-% ÓÃ¸ÅÂÊ¸üĞÂÎ´ÖªÇøÓòumask£¨¼´²»ÊÇÇ¿Ç°¾°fmask£¬Ò²²»ÊÇÇ¿±³¾°bmask£©
-% ¿ÉÄÜÊÇ¶¯Ì¬±³¾°£¬»òÕßÔË¶¯Ç°¾°
+% ç”¨æ¦‚ç‡æ›´æ–°æœªçŸ¥åŒºåŸŸumaskï¼ˆå³ä¸æ˜¯å¼ºå‰æ™¯fmaskï¼Œä¹Ÿä¸æ˜¯å¼ºèƒŒæ™¯bmaskï¼‰
+% å¯èƒ½æ˜¯åŠ¨æ€èƒŒæ™¯ï¼Œæˆ–è€…è¿åŠ¨å‰æ™¯
 % umask=(~fmask)&(~bmask);
 % ran=rand(size(umask));
 % ran=ran>0.7;
-% Ëæ»úµØ¼ÙÉè²¿·Ö¡¯ÈõÇ°¾°¡®Îª¡¯Ëæ»ú±³¾°¡®¡£
+% éšæœºåœ°å‡è®¾éƒ¨åˆ†â€™å¼±å‰æ™¯â€˜ä¸ºâ€™éšæœºèƒŒæ™¯â€˜ã€‚
 % ran=ran&umask&mask;  
 
-% ¶ÔÇ¿±³¾°bmask½øĞĞalpha=0.05µÄ±³¾°¸üĞÂ£¬¼«ÉÙÓĞÇ°¾°
-% ¶ÔÈõ±³¾°~mask½øĞĞalpha=0.03µÄ±³¾°¸üĞÂ,¿ÉÄÜÓĞÇ°¾°
-% ¶ÔËæ»ú±³¾°ran½øĞĞalpha=0.01µÄ±³¾°¸üĞÂ£¬¿ÉÄÜÓĞ±³¾°
+% å¯¹å¼ºèƒŒæ™¯bmaskè¿›è¡Œalpha=0.05çš„èƒŒæ™¯æ›´æ–°ï¼Œæå°‘æœ‰å‰æ™¯
+% å¯¹å¼±èƒŒæ™¯~maskè¿›è¡Œalpha=0.03çš„èƒŒæ™¯æ›´æ–°,å¯èƒ½æœ‰å‰æ™¯
+% å¯¹éšæœºèƒŒæ™¯ranè¿›è¡Œalpha=0.01çš„èƒŒæ™¯æ›´æ–°ï¼Œå¯èƒ½æœ‰èƒŒæ™¯
 % ran&(~mask)=ran&bmask=0, but bmask=(~mask)&(~fcmask)&bcmask;
 
 

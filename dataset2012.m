@@ -1,5 +1,5 @@
 function dataset2012()
-% ¶ÔÊı¾İ¼¯dataset2012½øĞĞ±éÀúµÄ±ê×¼ÉèÖÃ
+% å¯¹æ•°æ®é›†dataset2012è¿›è¡Œéå†çš„æ ‡å‡†è®¾ç½®
 root='D:\firefoxDownload\matlab\dataset2012\dataset';
 % layernum=3;
 pathlist1=dir(root);

@@ -76,7 +76,7 @@ else
             dif=rgb(:,:,:,2)-rgb(:,:,:,1);
             dif=sum(dif.^2,3);
             dif=dif(:);
-%             foregroundRadio,µÚÒ»Ö¡ÖĞÇ°¾°µÄ±ÈÀı¡£
+%             foregroundRadio,ç¬¬ä¸€å¸§ä¸­å‰æ™¯çš„æ¯”ä¾‹ã€‚
             threshold=prctile(dif,1-foregroundRadio);
             idx=dif>threshold;
             mask=idx;
@@ -215,12 +215,12 @@ if(andsum~=0||orsum~=a*b)
    disp('error andsum,orsum in datafit'); 
 end
 
-% ÓÃ¸ÅÂÊ¸üĞÂÎ´ÖªÇøÓòumask£¨¼´²»ÊÇÇ¿Ç°¾°fmask£¬Ò²²»ÊÇÇ¿±³¾°bmask£©
-% ¿ÉÄÜÊÇ¶¯Ì¬±³¾°£¬»òÕßÔË¶¯Ç°¾°
+% ç”¨æ¦‚ç‡æ›´æ–°æœªçŸ¥åŒºåŸŸumaskï¼ˆå³ä¸æ˜¯å¼ºå‰æ™¯fmaskï¼Œä¹Ÿä¸æ˜¯å¼ºèƒŒæ™¯bmaskï¼‰
+% å¯èƒ½æ˜¯åŠ¨æ€èƒŒæ™¯ï¼Œæˆ–è€…è¿åŠ¨å‰æ™¯
 umask=(~fmask)&(~bmask);
 ran=rand(size(umask));
 ran=ran>0.5;
-% Ëæ»úµØ¼ÙÉè±³¾°
+% éšæœºåœ°å‡è®¾èƒŒæ™¯
 ran=ran&umask;  
 
 pmaxidx=(pmaxidx&bmask)|ran;

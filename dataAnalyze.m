@@ -1,8 +1,8 @@
-%ÄâºÏ·ÖÎö¸ùÄ¿Â¼dataset2014,dataset2012ÏÂµÄËùÓĞÊı¾İ
-% dataset2014 °üº¬dataset2012, µ«ĞÂ¼ÓµÄÊÓÆµÀàgroundtruthÖ»Ìá¹©Ç°ÃæÒ»°ë
-% groundtruth ÓĞ5Àà
+%æ‹Ÿåˆåˆ†ææ ¹ç›®å½•dataset2014,dataset2012ä¸‹çš„æ‰€æœ‰æ•°æ®
+% dataset2014 åŒ…å«dataset2012, ä½†æ–°åŠ çš„è§†é¢‘ç±»groundtruthåªæä¾›å‰é¢ä¸€åŠ
+% groundtruth æœ‰5ç±»
 % outside roi=85,unknown=170,motion=255,hard shadow=50,static=0
-% Í»È»Í£Ö¹µÄÄ¿±ê½«Öğ½¥ÈÚÈë±³¾°
+% çªç„¶åœæ­¢çš„ç›®æ ‡å°†é€æ¸èå…¥èƒŒæ™¯
 function dataAnalyze()
 % root='D:\firefoxDownload\matlab\dataset2012\dataset';
 root='D:\Program\matlab\dataset2012\dataset';
@@ -132,7 +132,7 @@ else
     pre=p(4:6)'*r+p(1:3)'*ones(size(r));
     dif=sum(abs(pre-[r;g;b]),1);
 
-%     ¼ÆËã¹âÕÕÇ¿¶È´øÀ´µÄ²î±ğ,difabÎª³¬³ö±³¾°ÏñËØ·¶Î§ºóµÄ²î±ğ¼ÆËã    
+%     è®¡ç®—å…‰ç…§å¼ºåº¦å¸¦æ¥çš„å·®åˆ«,difabä¸ºè¶…å‡ºèƒŒæ™¯åƒç´ èŒƒå›´åçš„å·®åˆ«è®¡ç®—    
     minsr=min(r(static));
     a=p(4:6)*minsr+p(1:3);
     pre=a'*ones(size(r));
@@ -149,9 +149,9 @@ else
     idx=idx1(idx2);
     
     difab(idx)=dif(idx);
-%     ¿¼ÂÇ¹âÕÕÇ¿¶ÈĞÅÏ¢ consider lighting information
+%     è€ƒè™‘å…‰ç…§å¼ºåº¦ä¿¡æ¯ consider lighting information
     dif=difab;
-%   ×¢ÊÍ¿ÉºöÂÔ¹âÕÕÇ¿¶ÈĞÅÏ¢
+%   æ³¨é‡Šå¯å¿½ç•¥å…‰ç…§å¼ºåº¦ä¿¡æ¯
     
     maxstatic=max(dif(static));
     lengthstatic=length(static);
@@ -240,7 +240,7 @@ for i=1:8
     data=data(:);
     poly=polys(:,i,:);
     poly=poly(:);
-%     ¶ÔÓÚ»Ò¶ÈÍ¼Ïñ£¬resultsÈ«Îª0
+%     å¯¹äºç°åº¦å›¾åƒï¼Œresultså…¨ä¸º0
     if(sum(poly)~=0)
         data=reshape(data,8,8);
         data=data';
@@ -274,7 +274,7 @@ for i=1:8
 end
 
 function y=vecGapAnalyze(rgb,class)
-% ·ÖÎövecgap µÄ×î´óÖµ£¬×îĞ¡Öµ£¬Æ½¾ùÖµµÈÇé¿ö
+% åˆ†ævecgap çš„æœ€å¤§å€¼ï¼Œæœ€å°å€¼ï¼Œå¹³å‡å€¼ç­‰æƒ…å†µ
 [a,b,c,d]=size(rgb);
 layermean=double(rgb(:,:,:,1));
 fmax=-1;

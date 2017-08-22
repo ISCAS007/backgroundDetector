@@ -68,4 +68,4 @@ idx000=find(mark(3,3,1,:)==0);
 scatter_size=3;
 figure,scatter(r(idx000),g(idx000),scatter_size);
 hold on,scatter(r(idx170),g(idx170),scatter_size),scatter(r(idx255),g(idx255),scatter_size);
-legend('000±³¾°','170ÒõÓ°','255Ç°¾°');
+legend('000èƒŒæ™¯','170é˜´å½±','255å‰æ™¯');

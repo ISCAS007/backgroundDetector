@@ -1,10 +1,10 @@
-%ÄâºÏ·ÖÎö¸ùÄ¿Â¼dataset2014,dataset2012ÏÂµÄËùÓĞÊı¾İ
-% dataset2014 °üº¬dataset2012, µ«ĞÂ¼ÓµÄÊÓÆµÀàgroundtruthÖ»Ìá¹©Ç°ÃæÒ»°ë
-% groundtruth ÓĞ5Àà
+%æ‹Ÿåˆåˆ†ææ ¹ç›®å½•dataset2014,dataset2012ä¸‹çš„æ‰€æœ‰æ•°æ®
+% dataset2014 åŒ…å«dataset2012, ä½†æ–°åŠ çš„è§†é¢‘ç±»groundtruthåªæä¾›å‰é¢ä¸€åŠ
+% groundtruth æœ‰5ç±»
 % outside roi=85,unknown=170,motion=255,hard shadow=50,static=0
-% Í»È»Í£Ö¹µÄÄ¿±ê½«Öğ½¥ÈÚÈë±³¾°
+% çªç„¶åœæ­¢çš„ç›®æ ‡å°†é€æ¸èå…¥èƒŒæ™¯
 
-% % % ÑÏÖØÓĞÎÊÌâ£¬¸÷ÖÖÎÊÌâ£¬rgbµÄÖµ²»¶Ô¡£¡£¡££¡
+% % % ä¸¥é‡æœ‰é—®é¢˜ï¼Œå„ç§é—®é¢˜ï¼Œrgbçš„å€¼ä¸å¯¹ã€‚ã€‚ã€‚ï¼
 function dataAnalyze_run()
 % root='D:\firefoxDownload\matlab\dataset2012\dataset';
 root='D:\Program\matlab\dataset2012\dataset';

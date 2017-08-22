@@ -127,9 +127,9 @@ function layer=layerUpdate_yzbx(layer,frame)
         
 %     [vectormask,dif]=vectorLayerMask_yzbx(frame,vecMask,layer.pminSetMean,layer.pmaxSetMean,layer.mean,layer.vecgap);
 %     unfitRate=sum(sum(vectormask))/(sum(sum(vecMask))+1);
-% %     ¼õÂıÑ§Ï°ËÙ¶È£¬·ÀÖ¹Ç°¾°ÏûÈÚµÄÇé¿ö,´ıÊµÑé¼ìÑéĞ§¹û
+% %     å‡æ…¢å­¦ä¹ é€Ÿåº¦ï¼Œé˜²æ­¢å‰æ™¯æ¶ˆèçš„æƒ…å†µ,å¾…å®éªŒæ£€éªŒæ•ˆæœ
 %     randNum=double(rand(a,b)<learnRate+unfitRate);
-% %     ½ö¶Ôvectormask ÖĞµÄvecgap½øĞĞdif¸üĞÂ,¶ø¶ÔÈ«¾ÖµÄvecgap½øĞĞËæ»ú¸üĞÂ
+% %     ä»…å¯¹vectormask ä¸­çš„vecgapè¿›è¡Œdifæ›´æ–°,è€Œå¯¹å…¨å±€çš„vecgapè¿›è¡Œéšæœºæ›´æ–°
 %     layer.vecgap=layer.vecgap+double(vectormask).*dif-(layer.vecgap+dif).*double(randNum)*learnRate;
 %     
 % %     basevecgap...

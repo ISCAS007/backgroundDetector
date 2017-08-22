@@ -1,8 +1,8 @@
-%ÄâºÏ·ÖÎö¸ùÄ¿Â¼dataset2014,dataset2012ÏÂµÄËùÓĞÊı¾İ
-% dataset2014 °üº¬dataset2012, µ«ĞÂ¼ÓµÄÊÓÆµÀàgroundtruthÖ»Ìá¹©Ç°ÃæÒ»°ë
-% groundtruth ÓĞ5Àà
+%æ‹Ÿåˆåˆ†ææ ¹ç›®å½•dataset2014,dataset2012ä¸‹çš„æ‰€æœ‰æ•°æ®
+% dataset2014 åŒ…å«dataset2012, ä½†æ–°åŠ çš„è§†é¢‘ç±»groundtruthåªæä¾›å‰é¢ä¸€åŠ
+% groundtruth æœ‰5ç±»
 % outside roi=85,unknown=170,motion=255,hard shadow=50,static=0
-% Í»È»Í£Ö¹µÄÄ¿±ê½«Öğ½¥ÈÚÈë±³¾°
+% çªç„¶åœæ­¢çš„ç›®æ ‡å°†é€æ¸èå…¥èƒŒæ™¯
 function dataExtract()
 root='D:\firefoxDownload\matlab\dataset2012\dataset';
 % layernum=3;
@@ -51,7 +51,7 @@ goodroimap(:,6,7)=[19,182]';%intermittentObjectMotion-tramstop.mat
 goodroimap(:,6,8)=[44,124]';%intermittentObjectMotion-winterDriveway.mat
 
 
-% »ñµÃÏñËØrgbÒÔ¼°·ÖÀàĞÅÏ¢
+% è·å¾—åƒç´ rgbä»¥åŠåˆ†ç±»ä¿¡æ¯
 function [rgb,class]=getPointInfo(path,i,j)
 inputpath=[path,'\input'];
 inputlist=dir([path,'\input']);

@@ -1,5 +1,5 @@
 function commonBlock=getCommonBlock(bw1,bw2)
-% 求两个二值图像的相交连通块
+% 姹備袱涓簩鍊煎浘鍍忕殑鐩镐氦杩為�氬潡
 
 [label1,num1]=bwlabel(bw1,8);
 [label2,num2]=bwlabel(bw2,8);

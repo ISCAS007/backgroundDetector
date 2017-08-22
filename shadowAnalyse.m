@@ -1,8 +1,8 @@
 <<<<<<< HEAD
 function shadowAnalyse()
 % analyse the feature of shadow in one picture
-% ÇóÈ¡ÒõÓ°Óë±³¾°ÁÁ¶ÈµÄ¹ØÏµ£¬ÒõÓ°ÑÕÉ«Óë±³¾°ÑÕÉ«µÄ¹ØÏµ
-% ÒõÓ°¼ÆÊý´óÓÚ10,È¡100µ½200Ö¡£¬±³¾°ÁÁ¶È
+% æ±‚å–é˜´å½±ä¸ŽèƒŒæ™¯äº®åº¦çš„å…³ç³»ï¼Œé˜´å½±é¢œè‰²ä¸ŽèƒŒæ™¯é¢œè‰²çš„å…³ç³»
+% é˜´å½±è®¡æ•°å¤§äºŽ10,å–100åˆ°200å¸§ï¼ŒèƒŒæ™¯äº®åº¦
 root='D:\firefoxDownload\matlab\dataset2012\dataset\shadow\bungalows';
 roi=load([root,'\temporalROI.txt']);
 
@@ -151,8 +151,8 @@ end
 =======
 function shadowAnalyse()
 % analyse the feature of shadow in one picture
-% ÇóÈ¡ÒõÓ°Óë±³¾°ÁÁ¶ÈµÄ¹ØÏµ£¬ÒõÓ°ÑÕÉ«Óë±³¾°ÑÕÉ«µÄ¹ØÏµ
-% ÒõÓ°¼ÆÊý´óÓÚ10,È¡100µ½200Ö¡£¬±³¾°ÁÁ¶È
+% æ±‚å–é˜´å½±ä¸ŽèƒŒæ™¯äº®åº¦çš„å…³ç³»ï¼Œé˜´å½±é¢œè‰²ä¸ŽèƒŒæ™¯é¢œè‰²çš„å…³ç³»
+% é˜´å½±è®¡æ•°å¤§äºŽ10,å–100åˆ°200å¸§ï¼ŒèƒŒæ™¯äº®åº¦
 % root='D:\firefoxDownload\matlab\dataset2012\dataset\shadow\bungalows';
 root='D:\Program\matlab\dataset2012\dataset\shadow\bungalows';
 roi=load([root,'\temporalROI.txt']);
