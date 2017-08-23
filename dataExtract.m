@@ -4,7 +4,13 @@
 % outside roi=85,unknown=170,motion=255,hard shadow=50,static=0
 % 突然停止的目标将逐渐融入背景
 function dataExtract()
-root='D:\firefoxDownload\matlab\dataset2012\dataset';
+% windows
+% root='D:\firefoxDownload\matlab\dataset2012\dataset';
+
+% linux
+% root='/media/yzbx/Windows7_OS/ComputerVision/Dataset/dataset';
+datacfg
+
 % layernum=3;
 init();
 
@@ -12,18 +18,20 @@ pathlist1=dir(root);
 filenum1=length(pathlist1);
 filenamelist1={pathlist1.name};
 for i=3:filenum1
-    if(i~=6)
-       continue; 
-    end
-   pathlist2=dir([root,'\',filenamelist1{i}]);
+%     if(i~=6)
+%        continue; 
+%     end
+%    pathlist2=dir([root,'\',filenamelist1{i}]);
+   pathlist2=dir(fullfile(root,filenamelist1{i}));
    filenum2=length(pathlist2);
    filenamelist2={pathlist2.name};
    for j=3:filenum2
-       if(j~=4)
-           continue;
-       end
+%        if(j~=4)
+%            continue;
+%        end
        disp([i,j]);
-       path=[root,'\',filenamelist1{i},'\',filenamelist2{j}];
+%        path=[root,'\',filenamelist1{i},'\',filenamelist2{j}];
+        path=fullfile(root,filenamelist1{i},filenamelist2{j})
        [rgb,class]=getPointInfo(path,i,j);
    end
 end
@@ -53,17 +61,17 @@ goodroimap(:,6,8)=[44,124]';%intermittentObjectMotion-winterDriveway.mat
 
 % 获得像素rgb以及分类信息
 function [rgb,class]=getPointInfo(path,i,j)
-inputpath=[path,'\input'];
-inputlist=dir([path,'\input']);
-groundtruthpath=[path,'\groundtruth'];
-groundtruthlist=dir([path,'\groundtruth']);
-roiFrameNum=load([path,'\temporalROI.txt']);
+inputpath=fullfile(path,'input');
+inputlist=dir(inputpath);
+groundtruthpath=fullfile(path,'groundtruth');
+groundtruthlist=dir(groundtruthpath);
+roiFrameNum=load(fullfile(path,'temporalROI.txt'));
 
-frame=imread([inputpath,'\',inputlist(3).name]);
+frame=imread(fullfile(inputpath,inputlist(3).name));
 [width,height,channel]=size(frame);
 x=round(width/2);
 y=round(height/2);
-roiArea=imread([path,'\ROI.bmp']); 
+roiArea=imread(fullfile(path,'ROI.bmp')); 
 
 global blacklist;
 global goodroimap;
@@ -93,8 +101,8 @@ end
 rgb=zeros(5,5,channel,roiFrameNum(2)-roiFrameNum(1)+1);
 class=zeros(5,5,1,roiFrameNum(2)-roiFrameNum(1)+1);
 for i=roiFrameNum(1):roiFrameNum(2)
-    inputframe=imread([inputpath,'\',inputlist(i).name]);
-    groundtruthframe=imread([groundtruthpath,'\',groundtruthlist(i).name]);
+    inputframe=imread(fullfile(inputpath,inputlist(i).name));
+    groundtruthframe=imread(fullfile(groundtruthpath,groundtruthlist(i).name));
     num=i-roiFrameNum(1)+1;
     rgb(:,:,:,num)=inputframe(x-2:x+2,y-2:y+2,:);
     class(:,:,1,num)=groundtruthframe(x-2:x+2,y-2:y+2);
@@ -105,8 +113,9 @@ save(path2filename(path),'roipoint','rgb','class','path','i','j');
 
 % path2filename
 function filename=path2filename(path)
-root='D:\firefoxDownload\matlab\dataset201*\dataset\';
+datacfg
 start=length(root);
-shortpath=path(start+1:end);
+shortpath=path(start+2:end);
 filename=strrep(shortpath,'\','-');
+filename=strrep(filename,'/','-');
 filename=[filename,'.mat'];
