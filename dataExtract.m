@@ -109,13 +109,3 @@ for i=roiFrameNum(1):roiFrameNum(2)
 end
 roipoint=[x,y];
 save(path2filename(path),'roipoint','rgb','class','path','i','j');
-
-
-% path2filename
-function filename=path2filename(path)
-datacfg
-start=length(root);
-shortpath=path(start+2:end);
-filename=strrep(shortpath,'\','-');
-filename=strrep(filename,'/','-');
-filename=[filename,'.mat'];

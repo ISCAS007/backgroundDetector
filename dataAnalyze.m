@@ -71,7 +71,7 @@ if(isempty(shadow))
     shadow=1;
 end
 if(isempty(static))
-    shadow=1;
+    static=1;
 end
 
 if(c==1)
