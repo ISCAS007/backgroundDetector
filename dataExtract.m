@@ -18,9 +18,9 @@ pathlist1=dir(root);
 filenum1=length(pathlist1);
 filenamelist1={pathlist1.name};
 for i=3:filenum1
-%     if(i~=6)
-%        continue; 
-%     end
+    if(i~=8)
+       continue; 
+    end
 %    pathlist2=dir([root,'\',filenamelist1{i}]);
    pathlist2=dir(fullfile(root,filenamelist1{i}));
    filenum2=length(pathlist2);
@@ -32,6 +32,7 @@ for i=3:filenum1
        disp([i,j]);
 %        path=[root,'\',filenamelist1{i},'\',filenamelist2{j}];
         path=fullfile(root,filenamelist1{i},filenamelist2{j})
+        
        [rgb,class]=getPointInfo(path,i,j);
    end
 end
@@ -41,8 +42,8 @@ global blacklist;
 global goodroimap;
     
 blacklist=false(10,10);
-i=[3,4,5,5,5,6,6,6,6,6];
-j=[3,3,5,6,7,3,4,6,7,8];
+i=[3,4,5,5,5,6,6,6,6,6,8,8,8];
+j=[3,3,5,6,7,3,4,6,7,8,4,5,7];
 idx=i+(j-1)*10;
 blacklist(idx)=true;
 goodroimap=zeros(2,10,10);
@@ -57,6 +58,10 @@ goodroimap(:,6,4)=[187,139]';%intermittentObjectMotion-parking.mat
 goodroimap(:,6,6)=[292,60]';%intermittentObjectMotion-streetLight.mat
 goodroimap(:,6,7)=[19,182]';%intermittentObjectMotion-tramstop.mat
 goodroimap(:,6,8)=[44,124]';%intermittentObjectMotion-winterDriveway.mat
+goodroimap(:,8,4)=[219,188]';%shadow-bungulas
+goodroimap(:,8,5)=[65,105]';%shadow-busstation
+goodroimap(:,8,7)=[78,210]';%shadow-cubicle
+
 
 
 % 获得像素rgb以及分类信息
@@ -108,4 +113,4 @@ for i=roiFrameNum(1):roiFrameNum(2)
     class(:,:,1,num)=groundtruthframe(x-2:x+2,y-2:y+2);
 end
 roipoint=[x,y];
-save(path2filename(path),'roipoint','rgb','class','path','i','j');
+save(path2matname(path),'roipoint','rgb','class','path','i','j');
